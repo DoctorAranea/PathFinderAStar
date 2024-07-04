@@ -34,7 +34,7 @@ namespace PathFinder.Logic.GameObjects.Abstract
             if (PFinder.brightnessMaps.ContainsKey(name))
             {
                 Bitmap skin = PFinder.GetSkin(PFinder.brightnessMaps[name], TerrainColor);
-                g.DrawImage(skin, RealPosition);
+                g.DrawImage(skin, new Rectangle(RealPosition, new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
             }
             else
                 g.FillRectangle(new SolidBrush(TerrainColor), new Rectangle(RealPosition, offsetSize));

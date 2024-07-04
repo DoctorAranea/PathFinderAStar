@@ -17,9 +17,9 @@ namespace PathFinder.Logic
 {
     public class PFinder : Control
     {
-        public const int FIELD_WIDTH = 10;
-        public const int FIELD_HEIGHT = 10;
-        public const int CELLSIZE = 50;
+        public const int FIELD_WIDTH = 20;
+        public const int FIELD_HEIGHT = 20;
+        public const int CELLSIZE = 25;
 
         public static bool isGameplayEnabled = true;
         public static Dictionary<string, float[,]> brightnessMaps;
@@ -84,13 +84,15 @@ namespace PathFinder.Logic
                     mapDataX = 0;
                     for (int x = 0; x < FIELD_WIDTH; x++)
                     {
-                        char terrainChar = mapDataLines[mapDataY][mapDataX];
+                        char terrainChar = 'v';
+                        try { terrainChar = mapDataLines[mapDataY][mapDataX]; } catch { }
                         switch (terrainChar)
                         {
                             case 'g': terrains.Add(new Grass(new Point(x, y))); break;
                             case 'w': terrains.Add(new Water(new Point(x, y))); break;
                             case 'r': terrains.Add(new Rock(new Point(x, y))); break;
                             case 's': terrains.Add(new Sand(new Point(x, y))); break;
+                            case 'v': terrains.Add(new GameObjects.Terrains.Void(new Point(x, y))); break;
                         }
                         mapDataX++;
                     }
@@ -98,28 +100,43 @@ namespace PathFinder.Logic
                 }
             }
             catch { }
-
-            //GetNeighbors(GetTerrain(new Point(0, 0)));
         }
 
         private void Timer_Tick(object sender, EventArgs e)
-        { 
-            if (isGameplayEnabled) 
-                pBox.Invalidate(); 
+        {
+            if (isGameplayEnabled)
+                pBox.Invalidate();
         }
 
         private List<Point> gizmosPath = new List<Point>();
+        private int fieldOfView = 7;
+        private bool firstDraw = true;
 
         private void PBox_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             g.Clear(Color.Black);
 
-            for (int i = 0; i < terrains.Count; i++)
-                terrains[i].Draw(g);
+            if (!firstDraw)
+            {
+                var changedCells = creations.Select(x => x.FieldPosition).ToList();
+                var fieldOfViews = creations.Select(x => new Rectangle(x.FieldPosition.X - fieldOfView / 2, x.FieldPosition.Y - fieldOfView / 2, fieldOfView, fieldOfView)).ToList();
+                for (int i = 0; i < terrains.Count; i++)
+                {
+                    var rect = fieldOfViews.FirstOrDefault(x => x.Contains(terrains[i].FieldPosition));
+                    if (rect != default)
+                        terrains[i].Draw(g);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < terrains.Count; i++)
+                    terrains[i].Draw(g);
+                firstDraw = false;
+            }
 
-            int linesBrightness = 25;
-            Pen linesPen = new Pen(Color.FromArgb(linesBrightness, linesBrightness, linesBrightness));
+            //int linesBrightness = 25;
+            //Pen linesPen = new Pen(Color.FromArgb(linesBrightness, linesBrightness, linesBrightness));
 
             //for (int y = 0; y <= FIELD_HEIGHT; y++)
             //{

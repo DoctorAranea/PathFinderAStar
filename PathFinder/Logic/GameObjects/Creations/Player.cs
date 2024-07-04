@@ -36,7 +36,7 @@ namespace PathFinder.Logic.GameObjects.Creations
                 case "water":
                     {
                         if (sBoat != default)
-                            g.DrawImage(sBoat, RealPosition);
+                            g.DrawImage(sBoat, new Rectangle(RealPosition, new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
                         else
                             g.FillRectangle(brush, new Rectangle(RealPosition, RealSize));
                     }
@@ -45,7 +45,7 @@ namespace PathFinder.Logic.GameObjects.Creations
                     {
                         {
                             if (sCar != default)
-                                g.DrawImage(sCar, RealPosition);
+                                g.DrawImage(sCar, new Rectangle(RealPosition, new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
                             else
                                 g.FillEllipse(brush, new Rectangle(RealPosition, RealSize));
                         }
