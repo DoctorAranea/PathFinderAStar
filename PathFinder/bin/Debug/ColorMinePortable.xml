@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ColorMinePortable</name>
+    </assembly>
+    <members>
+        <member name="T:ColorMine.ColorSpaces.IColorSpace">
+            <summary>
+            Defines the public methods for all color spaces
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.IColorSpace.Initialize(ColorMine.ColorSpaces.IRgb)">
+            <summary>
+            Initialize settings from an Rgb object
+            </summary>
+            <param name="color"></param>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.IColorSpace.ToRgb">
+            <summary>
+            Convert the color space to Rgb, you should probably using the "To" method instead. Need to figure out a way to "hide" or otherwise remove this method from the public interface.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.IColorSpace.To``1">
+            <summary>
+            Convert any IColorSpace to any other IColorSpace.
+            </summary>
+            <typeparam name="T">IColorSpace type to convert to</typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.IColorSpace.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.Comparisons.IColorSpaceComparison)">
+            <summary>
+            Determine how close two IColorSpaces are to each other using a passed in algorithm
+            </summary>
+            <param name="compareToValue">Other IColorSpace to compare to</param>
+            <param name="comparer">Algorithm to use for comparison</param>
+            <returns>Distance in 3d space as double</returns>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.ColorSpace">
+            <summary>
+            Abstract ColorSpace class, defines the To method that converts between any IColorSpace.
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.ColorSpace.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.Comparisons.IColorSpaceComparison)">
+            <summary>
+            Convienience method for comparing any IColorSpace
+            </summary>
+            <param name="compareToValue"></param>
+            <param name="comparer"></param>
+            <returns>Single number representing the difference between two colors</returns>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.ColorSpace.To``1">
+            <summary>
+            Convert any IColorSpace to any other IColorSpace
+            </summary>
+            <typeparam name="T">Must implement IColorSpace, new()</typeparam>
+            <returns></returns>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Comparisons.Cie1976Comparison">
+            <summary>
+            Implements the CIE76 method of delta-e: http://en.wikipedia.org/wiki/Color_difference#CIE76
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.Cie1976Comparison.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.IColorSpace)">
+            <summary>
+            Calculates the CIE76 delta-e value: http://en.wikipedia.org/wiki/Color_difference#CIE76
+            </summary>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Comparisons.Cie94Comparison">
+            <summary>
+            Implements the Cie94 method of delta-e: http://en.wikipedia.org/wiki/Color_difference#CIE94
+            </summary>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Comparisons.Cie94Comparison.Application">
+            <summary>
+            Application type defines constants used in the Cie94 comparison
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.Cie94Comparison.#ctor">
+            <summary>
+            Create new Cie94Comparison. Defaults to GraphicArts application type.
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.Cie94Comparison.#ctor(ColorMine.ColorSpaces.Comparisons.Cie94Comparison.Application)">
+            <summary>
+            Create new Cie94Comparison for specific application type.
+            </summary>
+            <param name="application"></param>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.Cie94Comparison.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.IColorSpace)">
+            <summary>
+            Compare colors using the Cie94 algorithm. The first color (a) will be used as the reference color.
+            </summary>
+            <param name="a">Reference color</param>
+            <param name="b">Comparison color</param>
+            <returns></returns>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison">
+            <summary>
+            Implements the DE2000 method of delta-e: http://en.wikipedia.org/wiki/Color_difference#CIEDE2000
+            Correct implementation provided courtesy of Jonathan Hofinger, jaytar42
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.IColorSpace)">
+            <summary>
+            Calculates the DE2000 delta-e value: http://en.wikipedia.org/wiki/Color_difference#CIEDE2000
+            Correct implementation provided courtesy of Jonathan Hofinger, jaytar42
+            </summary>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Comparisons.CmcComparison">
+            <summary>
+            Implements the CMC l:c (1984) method of delta-e: http://en.wikipedia.org/wiki/Color_difference#CMC_l:c_.281984.29
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.CmcComparison.#ctor">
+            <summary>
+            Create CMC l:c comparison with DefaultLightness and DefaultChroma values.
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.CmcComparison.#ctor(System.Double,System.Double)">
+            <summary>
+            Create CMC l:c comparison with specific lightness (l) and chroma (c) values.
+            </summary>
+            <param name="lightness"></param>
+            <param name="chroma"></param>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.CmcComparison.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.IColorSpace)">
+            <summary>
+            Calculates the CMC l:c (1984) delta-e value: http://en.wikipedia.org/wiki/Color_difference#CMC_l:c_.281984.29
+            </summary>
+            <param name="colorA"></param>
+            <param name="colorB"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Comparisons.IColorSpaceComparison">
+            <summary>
+            Defines how comparison methods may be called
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.Comparisons.IColorSpaceComparison.Compare(ColorMine.ColorSpaces.IColorSpace,ColorMine.ColorSpaces.IColorSpace)">
+            <summary>
+            Returns the difference between two colors given based on the specified defined in the called class.
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <returns>Score based on similarity, the lower the score the closer the colors</returns>
+        </member>
+        <member name="T:ColorMine.ColorSpaces.Conversions.HsbConverter">
+            <summary>
+            HSB is another name for HSV
+            </summary>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.SystemColorExtension.To``1(System.Drawing.Color)">
+            <summary>
+            Convert System.Drawing.Color to any IColorSpace
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ColorMine.ColorSpaces.SystemColorExtension.ToSystemColor(ColorMine.ColorSpaces.IColorSpace)">
+            <summary>
+            Convert any IColorSpace to System.Drawing.Color
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
