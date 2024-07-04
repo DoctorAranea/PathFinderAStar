@@ -126,6 +126,13 @@ namespace PathFinder.Logic
                     var rect = fieldOfViews.FirstOrDefault(x => x.Contains(terrains[i].FieldPosition));
                     if (rect != default)
                         terrains[i].Draw(g);
+                    else
+                    {
+                        Color terraColor = terrains[i].TerrainColor;
+                        Color fogColor = Color.FromArgb(terraColor.R / 2, terraColor.G / 2, terraColor.B / 2);
+
+                        g.FillRectangle(new SolidBrush(fogColor), new Rectangle(terrains[i].RealPosition, new Size(terrains[i].RealSize.Width + 1, terrains[i].RealSize.Height + 1)));
+                    }
                 }
             }
             else
