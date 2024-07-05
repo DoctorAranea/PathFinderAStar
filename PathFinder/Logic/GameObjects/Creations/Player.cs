@@ -16,7 +16,6 @@ namespace PathFinder.Logic.GameObjects.Creations
         private string sBoatFilePath = "player\\s_boat.png";
         private Bitmap sBoat;
 
-
         private string sCarFilePath = "player\\s_car.png";
         private Bitmap sCar;
 
@@ -29,7 +28,6 @@ namespace PathFinder.Logic.GameObjects.Creations
 
         public override void Draw(Graphics g)
         {
-
             Terrain terra = PFinder.GetTerrain(FieldPosition);
             switch (terra.GetType().Name.ToLower())
             {

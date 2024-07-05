@@ -9,13 +9,20 @@ namespace PathFinder.Logic.GameObjects.Abstract
 {
     public abstract class Creation : GameObject
     {
-        protected Creation(Point fieldPosition) : base(fieldPosition) { }
+        public Point OldFieldPosition { get; private set; }
+        public Point OldRealPosition { get => new Point(OldFieldPosition.X * PFinder.CELLSIZE, OldFieldPosition.Y * PFinder.CELLSIZE); }
+
+        protected Creation(Point fieldPosition) : base(fieldPosition) 
+        {
+            OldFieldPosition = fieldPosition;
+        }
 
         public bool Move(Point end)
         {
             var terrain = PFinder.GetTerrain(end);
             if (terrain.MoveDifficulty < 150)
             {
+                OldFieldPosition = FieldPosition;
                 FieldPosition = end;
                 return true;
             }

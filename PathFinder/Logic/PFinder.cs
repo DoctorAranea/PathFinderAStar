@@ -28,6 +28,7 @@ namespace PathFinder.Logic
 
         private Player player;
 
+        private Rectangle fieldRect;
         private PictureBox pBox;
         private System.Windows.Forms.Timer timer;
 
@@ -36,6 +37,7 @@ namespace PathFinder.Logic
             DoubleBuffered = true;
             brightnessMaps = new Dictionary<string, float[,]>();
 
+            fieldRect = new Rectangle(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
             GenerateMap();
 
             player = new Player(Color.Red, new Point(4, 3));
@@ -104,35 +106,47 @@ namespace PathFinder.Logic
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            if (isGameplayEnabled)
-                pBox.Invalidate();
+            //pBox.Invalidate();
+            timer.Stop();
         }
 
+        private Graphics g;
+        private List<Point> changedCells = new List<Point>();
         private List<Point> gizmosPath = new List<Point>();
-        private int fieldOfView = 7;
+        private int fieldOfView = 3;
         private bool firstDraw = true;
 
         private void PBox_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.Clear(Color.Black);
+            g = e.Graphics;
+            //g.Clear(Color.Black);
 
             if (!firstDraw)
             {
-                var changedCells = creations.Select(x => x.FieldPosition).ToList();
+                changedCells.AddRange(creations.Select(x => x.FieldPosition));
                 var fieldOfViews = creations.Select(x => new Rectangle(x.FieldPosition.X - fieldOfView / 2, x.FieldPosition.Y - fieldOfView / 2, fieldOfView, fieldOfView)).ToList();
-                for (int i = 0; i < terrains.Count; i++)
-                {
-                    var rect = fieldOfViews.FirstOrDefault(x => x.Contains(terrains[i].FieldPosition));
-                    if (rect != default)
-                        terrains[i].Draw(g);
-                    else
-                    {
-                        Color terraColor = terrains[i].TerrainColor;
-                        Color fogColor = Color.FromArgb(terraColor.R / 2, terraColor.G / 2, terraColor.B / 2);
 
-                        g.FillRectangle(new SolidBrush(fogColor), new Rectangle(terrains[i].RealPosition, new Size(terrains[i].RealSize.Width + 1, terrains[i].RealSize.Height + 1)));
+                for (int i = 0; i < fieldOfViews.Count; i++)
+                {
+                    var fov = fieldOfViews[i];
+                    for (int y = fov.Y; y < fov.Y + fov.Height; y++)
+                    {
+                        for (int x = fov.X; x < fov.X + fov.Width; x++)
+                        {
+                            if (fieldRect.Contains(new Point(x, y)))
+                                changedCells.Add(new Point(x, y));
+                        }
                     }
+                }
+
+                while (changedCells.Count > 0)
+                {
+                    Point changedCell = changedCells[0];
+
+                    var rect = fieldOfViews.FirstOrDefault(x => x.Contains(changedCell));
+                    GetTerrain(changedCell).Draw(g);
+
+                    changedCells.RemoveAt(0);
                 }
             }
             else
@@ -164,7 +178,8 @@ namespace PathFinder.Logic
                     Point realPathPosition = new Point(gizmosPath[i].X * CELLSIZE, gizmosPath[i].Y * CELLSIZE);
                     realPathPosition.X += CELLSIZE / 2;
                     realPathPosition.Y += CELLSIZE / 2;
-                    g.DrawLine(new Pen(Color.Red, (gizmosPath.Count - i)), start, realPathPosition);
+                    GetTerrain(gizmosPath[i]).Draw(g);
+                    g.DrawLine(new Pen(Color.Yellow, (gizmosPath.Count - i)), start, realPathPosition);
                     start = realPathPosition;
                 }
             }
@@ -184,8 +199,9 @@ namespace PathFinder.Logic
 
             if (gizmosPath.Count == 0 || gizmosPath.LastOrDefault() != fieldClickPosition)
             {
+                UpdateGizmosGraphics(clear: true);
                 gizmosPath = player.FindPath(player.FieldPosition, fieldClickPosition);
-                pBox.Invalidate();
+                UpdateGizmosGraphics(clear: false);
                 isGameplayEnabled = true;
             }
             else
@@ -198,13 +214,33 @@ namespace PathFinder.Logic
                         gizmosPath.RemoveAt(0);
                         Invoke(new Action(() =>
                         {
-                            pBox.Invalidate();
+                            pBox.Invalidate(new Rectangle(
+                                new Point(player.RealPosition.X - CELLSIZE, player.RealPosition.Y - CELLSIZE),
+                                new Size(player.RealSize.Width + CELLSIZE * 2, player.RealSize.Height + CELLSIZE * 2))
+                            );
                         }));
                         Thread.Sleep(100);
                     }
                     gizmosPath.Clear();
                     isGameplayEnabled = true;
                 }).Start();
+            }
+        }
+
+        private void UpdateGizmosGraphics(bool clear)
+        {
+            for (int i = gizmosPath.Count - 1; i >= 0; i--)
+            {
+                var gizmos = gizmosPath[i];
+                if (clear)
+                {
+                    changedCells.Add(gizmos);
+                    gizmosPath.Remove(gizmos);
+                }
+                pBox.Invalidate(new Rectangle(
+                    new Point(gizmos.X * CELLSIZE, gizmos.Y * CELLSIZE),
+                    new Size(CELLSIZE, CELLSIZE))
+                );
             }
         }
 
