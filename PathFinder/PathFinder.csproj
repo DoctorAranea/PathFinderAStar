@@ -53,7 +53,7 @@
     <Compile Include="Logic\GameObjects\Abstract\Creation.cs" />
     <Compile Include="Logic\GameObjects\Creations\Player.cs" />
     <Compile Include="Logic\GameObjects\Abstract\Terrain.cs" />
-    <Compile Include="Logic\GameObjects\SimplifiedTerrain.cs" />
+    <Compile Include="Logic\GameObjects\TerrainPathData.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Grass.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Rock.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Sand.cs" />

@@ -268,9 +268,9 @@ namespace PathFinder.Logic
             return neighbors;
         }
 
-        public static List<SimplifiedTerrain> GetNeighborsList(SimplifiedTerrain terrain)
+        public static List<TerrainPathData> GetNeighborsList(TerrainPathData terrain)
         {
-            List<SimplifiedTerrain> neighbors = new List<SimplifiedTerrain>();
+            List<TerrainPathData> neighbors = new List<TerrainPathData>();
             int nX;
             int nY = 0;
             for (int y = terrain.fieldPosition.Y - 1; y < terrain.fieldPosition.Y + 2; y++)
@@ -286,7 +286,7 @@ namespace PathFinder.Logic
                         var neighborTerra = terrains.FirstOrDefault(t => t.FieldPosition == new Point(x, y));
                         if (neighborTerra != null)
                         {
-                            SimplifiedTerrain neighbor = neighborTerra.ToSimplified();
+                            TerrainPathData neighbor = neighborTerra.ToSimplified();
                             neighbors.Add(neighbor);
                         }
                     }

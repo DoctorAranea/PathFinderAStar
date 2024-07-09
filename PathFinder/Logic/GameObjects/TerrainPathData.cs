@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace PathFinder.Logic.GameObjects
 {
-    public class SimplifiedTerrain
+    public class TerrainPathData
     {
         public class PathData
         {
             public float weight;
             public float pathLength;
             public float lengthToEnd;
-            public SimplifiedTerrain link;
+            public TerrainPathData link;
 
-            public PathData(float pathLength, float lengthToEnd, SimplifiedTerrain link)
+            public PathData(float pathLength, float lengthToEnd, TerrainPathData link)
             {
                 this.link = link;
                 this.pathLength = pathLength;
@@ -29,7 +29,7 @@ namespace PathFinder.Logic.GameObjects
         public float moveDifficulty;
         public PathData pathData;
 
-        public SimplifiedTerrain(Point fieldPosition, float moveDifficulty)
+        public TerrainPathData(Point fieldPosition, float moveDifficulty)
         {
             this.fieldPosition = fieldPosition;
             this.moveDifficulty = moveDifficulty;

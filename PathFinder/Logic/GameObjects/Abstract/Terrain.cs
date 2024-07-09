@@ -40,6 +40,6 @@ namespace PathFinder.Logic.GameObjects.Abstract
                 g.FillRectangle(new SolidBrush(TerrainColor), new Rectangle(RealPosition, offsetSize));
         }
 
-        public SimplifiedTerrain ToSimplified() => new SimplifiedTerrain(FieldPosition, MoveDifficulty);
+        public TerrainPathData ToSimplified() => new TerrainPathData(FieldPosition, MoveDifficulty);
     }
 }

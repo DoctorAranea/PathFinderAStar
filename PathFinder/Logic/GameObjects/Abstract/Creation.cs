@@ -9,13 +9,15 @@ namespace PathFinder.Logic.GameObjects.Abstract
 {
     public abstract class Creation : GameObject
     {
-        public Point OldFieldPosition { get; private set; }
-        public Point OldRealPosition { get => new Point(OldFieldPosition.X * PFinder.CELLSIZE, OldFieldPosition.Y * PFinder.CELLSIZE); }
-
-        protected Creation(Point fieldPosition) : base(fieldPosition) 
+        protected Creation(Point fieldPosition) : base(fieldPosition)
         {
             OldFieldPosition = fieldPosition;
         }
+
+        public abstract bool CanUseWater { get; protected set; }
+
+        public Point OldFieldPosition { get; private set; }
+        public Point OldRealPosition { get => new Point(OldFieldPosition.X * PFinder.CELLSIZE, OldFieldPosition.Y * PFinder.CELLSIZE); }
 
         public bool Move(Point end)
         {
@@ -33,10 +35,10 @@ namespace PathFinder.Logic.GameObjects.Abstract
         public List<Point> FindPath(Point start, Point end)
         {
             Terrain[,] terrains = PFinder.TerrainMap;
-            var openList = new List<SimplifiedTerrain>();
-            var closedList = new List<SimplifiedTerrain>();
+            var openList = new List<TerrainPathData>();
+            var closedList = new List<TerrainPathData>();
 
-            SimplifiedTerrain activeTerra = terrains[start.X, start.Y].ToSimplified();
+            TerrainPathData activeTerra = terrains[start.X, start.Y].ToSimplified();
 
             while (activeTerra.fieldPosition.X != end.X || activeTerra.fieldPosition.Y != end.Y)
             {
@@ -70,9 +72,9 @@ namespace PathFinder.Logic.GameObjects.Abstract
 
         private void AppendOpenList
             (
-                List<SimplifiedTerrain> openList,
-                List<SimplifiedTerrain> closedList,
-                SimplifiedTerrain activeTerra,
+                List<TerrainPathData> openList,
+                List<TerrainPathData> closedList,
+                TerrainPathData activeTerra,
                 Point end
             )
         {
@@ -82,10 +84,10 @@ namespace PathFinder.Logic.GameObjects.Abstract
                 float lengthToEndY = Math.Abs(end.Y - activeTerra.fieldPosition.Y);
                 float lengthToEnd = (lengthToEndX + lengthToEndY) * 10;
 
-                activeTerra.pathData = new SimplifiedTerrain.PathData(1, lengthToEnd, null);
+                activeTerra.pathData = new TerrainPathData.PathData(1, lengthToEnd, null);
             }
 
-            List<SimplifiedTerrain> neighbors = PFinder.GetNeighborsList(activeTerra).Select(x => x).ToList();
+            List<TerrainPathData> neighbors = PFinder.GetNeighborsList(activeTerra).Select(x => x).ToList();
             for (int i = 0; i < neighbors.Count; i++)
             {
                 var neighbor = neighbors[i];
@@ -96,10 +98,13 @@ namespace PathFinder.Logic.GameObjects.Abstract
                 int nX = neighbor.fieldPosition.X;
                 int nY = neighbor.fieldPosition.Y;
 
-                SimplifiedTerrain fromOpenList = openList.FirstOrDefault(x => x.fieldPosition.X == nX && x.fieldPosition.Y == nY);
+                TerrainPathData fromOpenList = openList.FirstOrDefault(x => x.fieldPosition.X == nX && x.fieldPosition.Y == nY);
 
                 if (closedList.FirstOrDefault(x => x.fieldPosition == neighbor.fieldPosition) == null)
                 {
+                    Terrain neighborTerrain = PFinder.GetTerrain(neighbor.fieldPosition);
+                    if (neighborTerrain is Terrains.Water && !CanUseWater) continue;
+
                     bool diagonal = nX != activeTerra.fieldPosition.X && nY != activeTerra.fieldPosition.Y;
                     float pathLength = ((diagonal ? 14 : 10) + activeTerra.pathData.pathLength) * neighbor.moveDifficulty;
 
@@ -113,7 +118,7 @@ namespace PathFinder.Logic.GameObjects.Abstract
                     float lengthToEndY = Math.Abs(end.Y - nY);
                     float lengthToEnd = (lengthToEndX + lengthToEndY) * 10;
 
-                    var pathData = new SimplifiedTerrain.PathData(pathLength, lengthToEnd, activeTerra);
+                    var pathData = new TerrainPathData.PathData(pathLength, lengthToEnd, activeTerra);
 
                     if (fromOpenList != null)
                     {
