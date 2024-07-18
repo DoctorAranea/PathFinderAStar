@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PathFinder.Logic.GameObjects.Abstract
@@ -16,6 +17,8 @@ namespace PathFinder.Logic.GameObjects.Abstract
 
         public abstract bool CanUseWater { get; protected set; }
 
+        public int OffsetX { get; set; }
+        public int OffsetY { get; set; }
         public Point OldFieldPosition { get; private set; }
         public Point OldRealPosition { get => new Point(OldFieldPosition.X * PFinder.CELLSIZE, OldFieldPosition.Y * PFinder.CELLSIZE); }
 

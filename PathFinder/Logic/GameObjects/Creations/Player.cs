@@ -62,17 +62,21 @@ namespace PathFinder.Logic.GameObjects.Creations
             ).bmpHaver.bmp;
         }
 
+        private string oldDirection = "right";
         public override void Draw(Graphics g)
         {
             Terrain terra = PFinder.GetTerrain(FieldPosition);
             string transport = terra.GetType().Name.ToLower() == "water" ? "boat" : "car";
             string direction;
 
-            if (OldFieldPosition.X != FieldPosition.X)
-                direction = OldFieldPosition.X > FieldPosition.X ? "left" : "right";
+            if (OffsetX != 0)
+                direction = OffsetX < 0 ? "left" : "right";
+            else if (OffsetY != 0)
+                direction = OffsetY < 0 ? "up" : "down";
             else
-                direction = OldFieldPosition.Y > FieldPosition.Y ? "up" : "down";
+                direction = oldDirection;
 
+            oldDirection = direction;
             Bitmap bitmap = GetBitmap(transport, direction);
             if (bitmap != null)
                 DrawImage(g, bitmap);
@@ -80,8 +84,8 @@ namespace PathFinder.Logic.GameObjects.Creations
                 DrawDefault(g);
 
 
-            void DrawImage(Graphics g, Image img) => g.DrawImage(img, new Rectangle(RealPosition, new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
-            void DrawDefault(Graphics g) => g.FillEllipse(brush, new Rectangle(RealPosition, RealSize));
+            void DrawImage(Graphics g, Image img) => g.DrawImage(img, new Rectangle(new Point(RealPosition.X + OffsetX, RealPosition.Y + OffsetY), new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
+            void DrawDefault(Graphics g) => g.FillEllipse(brush, new Rectangle(new Point(RealPosition.X + OffsetX, RealPosition.Y + OffsetY), RealSize));
         }
     }
 }

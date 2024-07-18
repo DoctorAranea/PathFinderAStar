@@ -19,14 +19,19 @@ namespace PathFinder.Logic
     {
         public const int FIELD_WIDTH = 20;
         public const int FIELD_HEIGHT = 20;
-        public const int CELLSIZE = 25;
+        public const int CELLSIZE = 40;
 
         public static bool isGameplayEnabled = true;
+        public static bool drawGizmosPath = true;
+        public static bool drawGizmosGoal = true;
         public static Dictionary<string, float[,]> brightnessMaps;
         private static List<Terrain> terrains;
         private static List<Creation> creations;
 
         private Player player;
+
+        private string goalBitmapPath = "goal.png";
+        private Bitmap goalBitmap;
 
         private Rectangle fieldRect;
         private PictureBox pBox;
@@ -36,6 +41,9 @@ namespace PathFinder.Logic
         {
             DoubleBuffered = true;
             brightnessMaps = new Dictionary<string, float[,]>();
+
+            if (File.Exists(goalBitmapPath))
+                goalBitmap = new Bitmap(goalBitmapPath);
 
             fieldRect = new Rectangle(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
             GenerateMap();
@@ -115,6 +123,7 @@ namespace PathFinder.Logic
         private List<Point> gizmosPath = new List<Point>();
         private int fieldOfView = 3;
         private bool firstDraw = true;
+        private bool gizmosDrawn = false;
 
         private void PBox_Paint(object sender, PaintEventArgs e)
         {
@@ -156,19 +165,7 @@ namespace PathFinder.Logic
                 firstDraw = false;
             }
 
-            //int linesBrightness = 25;
-            //Pen linesPen = new Pen(Color.FromArgb(linesBrightness, linesBrightness, linesBrightness));
-
-            //for (int y = 0; y <= FIELD_HEIGHT; y++)
-            //{
-            //    for (int x = 0; x <= FIELD_WIDTH; x++)
-            //    {
-            //        g.DrawLine(linesPen, CELLSIZE * x, CELLSIZE * y, CELLSIZE * x, FIELD_HEIGHT);
-            //        g.DrawLine(linesPen, CELLSIZE * x, CELLSIZE * y, FIELD_WIDTH, CELLSIZE * y);
-            //    }
-            //}
-
-            if (gizmosPath.Count > 0)
+            if (drawGizmosPath && !gizmosDrawn && gizmosPath.Count > 0)
             {
                 Point start = player.RealPosition;
                 start.X += CELLSIZE / 2;
@@ -182,10 +179,24 @@ namespace PathFinder.Logic
                     g.DrawLine(new Pen(Color.Yellow, (gizmosPath.Count - i)), start, realPathPosition);
                     start = realPathPosition;
                 }
+
+            }
+
+            if (drawGizmosGoal && !gizmosDrawn && gizmosPath.Count > 0)
+            {
+                Point goal = gizmosPath.LastOrDefault();
+                Point realGoalPosition = new Point(goal.X * CELLSIZE, goal.Y * CELLSIZE);
+                GetTerrain(goal).Draw(g);
+                if (goalBitmap != default)
+                    g.DrawImage(goalBitmap, new Rectangle(realGoalPosition, new Size(CELLSIZE, CELLSIZE)));
+                else
+                    g.DrawEllipse(new Pen(Color.Yellow), new Rectangle(realGoalPosition, new Size(CELLSIZE - 1, CELLSIZE - 1)));
             }
 
             for (int i = 0; i < creations.Count; i++)
                 creations[i].Draw(g);
+
+            gizmosDrawn = true;
         }
 
         private void PBox_MouseClick(object sender, MouseEventArgs e)
@@ -197,38 +208,56 @@ namespace PathFinder.Logic
             Point clickPosition = e.Location;
             Point fieldClickPosition = new Point(clickPosition.X / CELLSIZE, clickPosition.Y / CELLSIZE);
 
-            if (gizmosPath.Count == 0 || gizmosPath.LastOrDefault() != fieldClickPosition)
+            gizmosDrawn = false;
+            gizmosPath = player.FindPath(player.FieldPosition, fieldClickPosition);
+            UpdateGizmosGraphics(clear: false);
+            UpdateGoalGraphics();
+
+            new Thread(() =>
             {
-                UpdateGizmosGraphics(clear: true);
-                gizmosPath = player.FindPath(player.FieldPosition, fieldClickPosition);
-                UpdateGizmosGraphics(clear: false);
-                isGameplayEnabled = true;
-            }
-            else
-            {
-                new Thread(() =>
+                while (gizmosPath.Count > 0)
                 {
-                    while (gizmosPath.Count > 0)
+                    bool changedX = player.FieldPosition.X != gizmosPath[0].X;
+                    bool offsetIsNatural = (changedX ? player.FieldPosition.X : player.FieldPosition.Y) < (changedX ? gizmosPath[0].X : gizmosPath[0].Y);
+                    int offsetsCount = 10;
+                    int offset = CELLSIZE / offsetsCount;
+
+                    for (int i = 1; i < offsetsCount; i++)
                     {
-                        player.Move(gizmosPath[0]);
-                        gizmosPath.RemoveAt(0);
+                        int totalOffset = offsetIsNatural ? offset : -offset;
+                        player.OffsetX = changedX ? totalOffset * i : 0;
+                        player.OffsetY = changedX ? 0 : totalOffset * i;
+                        DrawCreationFromAnotherThread(player);
+                        Thread.Sleep(25);
+                    }
+
+                    player.Move(gizmosPath[0]);
+                    gizmosPath.RemoveAt(0);
+
+                    player.OffsetX = 0;
+                    player.OffsetY = 0;
+                    DrawCreationFromAnotherThread(player);
+
+                    void DrawCreationFromAnotherThread(Creation creation)
+                    {
                         Invoke(new Action(() =>
                         {
                             pBox.Invalidate(new Rectangle(
-                                new Point(player.RealPosition.X - CELLSIZE, player.RealPosition.Y - CELLSIZE),
-                                new Size(player.RealSize.Width + CELLSIZE * 2, player.RealSize.Height + CELLSIZE * 2))
+                                new Point(creation.RealPosition.X - CELLSIZE, creation.RealPosition.Y - CELLSIZE),
+                                new Size(creation.RealSize.Width + CELLSIZE * 2, creation.RealSize.Height + CELLSIZE * 2))
                             );
                         }));
-                        Thread.Sleep(100);
                     }
-                    gizmosPath.Clear();
-                    isGameplayEnabled = true;
-                }).Start();
-            }
+                }
+                isGameplayEnabled = true;
+            }).Start();
         }
 
         private void UpdateGizmosGraphics(bool clear)
         {
+            if (!drawGizmosPath)
+                return;
+
             for (int i = gizmosPath.Count - 1; i >= 0; i--)
             {
                 var gizmos = gizmosPath[i];
@@ -242,6 +271,19 @@ namespace PathFinder.Logic
                     new Size(CELLSIZE, CELLSIZE))
                 );
             }
+        }
+
+        private void UpdateGoalGraphics()
+        {
+            if (!drawGizmosGoal)
+                return;
+
+            Point goal = gizmosPath.LastOrDefault();
+            changedCells.Add(goal);
+            pBox.Invalidate(new Rectangle(
+                new Point(goal.X * CELLSIZE, goal.Y * CELLSIZE),
+                new Size(CELLSIZE, CELLSIZE))
+            );
         }
 
         public static Terrain GetTerrain(Point coords) => terrains.FirstOrDefault(x => x.FieldPosition == coords);

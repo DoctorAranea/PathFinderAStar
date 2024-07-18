@@ -17,6 +17,12 @@ namespace PathFinder
         public MainForm()
         {
             InitializeComponent();
+            Load += MainForm_Load;
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            this.Size = new Size(PFinder.CELLSIZE * PFinder.FIELD_WIDTH + 16, PFinder.CELLSIZE * PFinder.FIELD_HEIGHT + 39);
         }
     }
 }
