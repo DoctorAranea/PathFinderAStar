@@ -17,9 +17,9 @@ namespace PathFinder.Logic
 {
     public class PFinder : Control
     {
-        public const int FIELD_WIDTH = 20;
-        public const int FIELD_HEIGHT = 20;
-        public const int CELLSIZE = 40;
+        public static int FIELD_WIDTH = 20;
+        public static int FIELD_HEIGHT = 20;
+        public static int CELLSIZE = 30;
 
         public static bool isGameplayEnabled = true;
         public static bool drawGizmosPath = true;
@@ -37,7 +37,7 @@ namespace PathFinder.Logic
         private PictureBox pBox;
         private System.Windows.Forms.Timer timer;
 
-        public PFinder() : base()
+        public PFinder(int fieldWidth, int fieldHeight) : base()
         {
             DoubleBuffered = true;
             brightnessMaps = new Dictionary<string, float[,]>();
@@ -45,6 +45,8 @@ namespace PathFinder.Logic
             if (File.Exists(goalBitmapPath))
                 goalBitmap = new Bitmap(goalBitmapPath);
 
+            FIELD_WIDTH = fieldWidth;
+            FIELD_HEIGHT = fieldHeight;
             fieldRect = new Rectangle(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
             GenerateMap();
 
@@ -219,7 +221,7 @@ namespace PathFinder.Logic
                 {
                     bool changedX = player.FieldPosition.X != gizmosPath[0].X;
                     bool offsetIsNatural = (changedX ? player.FieldPosition.X : player.FieldPosition.Y) < (changedX ? gizmosPath[0].X : gizmosPath[0].Y);
-                    int offsetsCount = 10;
+                    int offsetsCount = 5;
                     int offset = CELLSIZE / offsetsCount;
 
                     for (int i = 1; i < offsetsCount; i++)

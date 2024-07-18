@@ -28,38 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pFinder1 = new PathFinder.Logic.PFinder();
             this.SuspendLayout();
-            // 
-            // pFinder1
-            // 
-            this.pFinder1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pFinder1.Location = new System.Drawing.Point(0, 0);
-            this.pFinder1.Name = "pFinder1";
-            this.pFinder1.Size = new System.Drawing.Size(600, 600);
-            this.pFinder1.TabIndex = 0;
-            this.pFinder1.Text = "pFinder1";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(600, 600);
-            this.Controls.Add(this.pFinder1);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Form1";
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private Logic.PFinder pFinder1;
     }
 }
 
