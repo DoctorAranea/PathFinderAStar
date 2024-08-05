@@ -33,7 +33,6 @@ namespace PathFinder.Logic
         private string goalBitmapPath = "goal.png";
         private Bitmap goalBitmap;
 
-        private Rectangle fieldRect;
         private PictureBox pBox;
         private System.Windows.Forms.Timer timer;
 
@@ -47,7 +46,6 @@ namespace PathFinder.Logic
 
             FIELD_WIDTH = fieldWidth;
             FIELD_HEIGHT = fieldHeight;
-            fieldRect = new Rectangle(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
             GenerateMap();
 
             player = new Player(Color.Red, new Point(4, 3));
@@ -58,13 +56,14 @@ namespace PathFinder.Logic
             pBox = new PictureBox();
             pBox.Parent = this;
             pBox.Dock = DockStyle.Fill;
-            pBox.Paint += PBox_Paint;
             pBox.MouseClick += PBox_MouseClick;
 
-            timer = new System.Windows.Forms.Timer();
-            timer.Interval = 250;
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            //timer = new System.Windows.Forms.Timer();
+            //timer.Interval = 250;
+            //timer.Tick += Timer_Tick;
+            //timer.Start();
+
+            DrawMap();
         }
 
         public static Terrain[,] TerrainMap
@@ -87,6 +86,9 @@ namespace PathFinder.Logic
 
             try
             {
+                bm_map = new Bitmap(FIELD_WIDTH * CELLSIZE, FIELD_HEIGHT * CELLSIZE);
+                Graphics g = Graphics.FromImage(bm_map);
+
                 string[] mapDataLines = File.ReadAllLines("map.dat");
 
                 int mapDataX;
@@ -106,6 +108,7 @@ namespace PathFinder.Logic
                             case 's': terrains.Add(new Sand(new Point(x, y))); break;
                             case 'v': terrains.Add(new GameObjects.Terrains.Void(new Point(x, y))); break;
                         }
+                        terrains.LastOrDefault().Draw(g);
                         mapDataX++;
                     }
                     mapDataY++;
@@ -114,178 +117,112 @@ namespace PathFinder.Logic
             catch { }
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            //pBox.Invalidate();
-            timer.Stop();
-        }
+        //private void Timer_Tick(object sender, EventArgs e)
+        //{
+        //    //pBox.Invalidate();
+        //    timer.Stop();
+        //}
 
-        private Graphics g;
-        private List<Point> changedCells = new List<Point>();
         private List<Point> gizmosPath = new List<Point>();
-        private int fieldOfView = 3;
-        private bool firstDraw = true;
-        private bool gizmosDrawn = false;
 
-        private void PBox_Paint(object sender, PaintEventArgs e)
+        private Bitmap bm_map;
+
+        private void DrawMap()
         {
-            g = e.Graphics;
-            //g.Clear(Color.Black);
+            Bitmap world = new Bitmap(bm_map);
+            Graphics g = Graphics.FromImage(world);
 
-            if (!firstDraw)
+            for (int i = 0; i < gizmosPath.Count - 1; i++)
             {
-                changedCells.AddRange(creations.Select(x => x.FieldPosition));
-                var fieldOfViews = creations.Select(x => new Rectangle(x.FieldPosition.X - fieldOfView / 2, x.FieldPosition.Y - fieldOfView / 2, fieldOfView, fieldOfView)).ToList();
-
-                for (int i = 0; i < fieldOfViews.Count; i++)
-                {
-                    var fov = fieldOfViews[i];
-                    for (int y = fov.Y; y < fov.Y + fov.Height; y++)
-                    {
-                        for (int x = fov.X; x < fov.X + fov.Width; x++)
-                        {
-                            if (fieldRect.Contains(new Point(x, y)))
-                                changedCells.Add(new Point(x, y));
-                        }
-                    }
-                }
-
-                while (changedCells.Count > 0)
-                {
-                    Point changedCell = changedCells[0];
-
-                    var rect = fieldOfViews.FirstOrDefault(x => x.Contains(changedCell));
-                    GetTerrain(changedCell).Draw(g);
-
-                    changedCells.RemoveAt(0);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < terrains.Count; i++)
-                    terrains[i].Draw(g);
-                firstDraw = false;
+                Point realPathPosition = GetRealPosition(gizmosPath[i]);
+                realPathPosition.X += CELLSIZE / 2;
+                realPathPosition.Y += CELLSIZE / 2;
+                g.FillRectangle(new SolidBrush(Color.Yellow), new Rectangle(realPathPosition.X - 3, realPathPosition.Y - 3, 6, 6));
             }
 
-            if (drawGizmosPath && !gizmosDrawn && gizmosPath.Count > 0)
+            if (gizmosPath.Count > 0)
             {
-                Point start = player.RealPosition;
-                start.X += CELLSIZE / 2;
-                start.Y += CELLSIZE / 2;
-                for (int i = 0; i < gizmosPath.Count; i++)
-                {
-                    Point realPathPosition = new Point(gizmosPath[i].X * CELLSIZE, gizmosPath[i].Y * CELLSIZE);
-                    realPathPosition.X += CELLSIZE / 2;
-                    realPathPosition.Y += CELLSIZE / 2;
-                    GetTerrain(gizmosPath[i]).Draw(g);
-                    g.DrawLine(new Pen(Color.Yellow, (gizmosPath.Count - i)), start, realPathPosition);
-                    start = realPathPosition;
-                }
+                Point gizmosGoal = gizmosPath.LastOrDefault();
 
-            }
-
-            if (drawGizmosGoal && !gizmosDrawn && gizmosPath.Count > 0)
-            {
-                Point goal = gizmosPath.LastOrDefault();
-                Point realGoalPosition = new Point(goal.X * CELLSIZE, goal.Y * CELLSIZE);
-                GetTerrain(goal).Draw(g);
                 if (goalBitmap != default)
-                    g.DrawImage(goalBitmap, new Rectangle(realGoalPosition, new Size(CELLSIZE, CELLSIZE)));
+                    g.DrawImage(goalBitmap, new Rectangle(GetRealPosition(gizmosGoal), new Size(CELLSIZE, CELLSIZE)));
                 else
-                    g.DrawEllipse(new Pen(Color.Yellow), new Rectangle(realGoalPosition, new Size(CELLSIZE - 1, CELLSIZE - 1)));
+                    g.DrawEllipse(new Pen(Color.Yellow), new Rectangle(GetRealPosition(gizmosGoal), new Size(CELLSIZE - 1, CELLSIZE - 1)));
             }
 
             for (int i = 0; i < creations.Count; i++)
                 creations[i].Draw(g);
 
-            gizmosDrawn = true;
+            pBox.Image = world;
         }
+
+        private Point GetRealPosition(Point fieldPosition) => new Point(fieldPosition.X * CELLSIZE, fieldPosition.Y * CELLSIZE);
 
         private void PBox_MouseClick(object sender, MouseEventArgs e)
         {
-            if (!isGameplayEnabled)
-                return;
-
-            isGameplayEnabled = false;
-            Point clickPosition = e.Location;
-            Point fieldClickPosition = new Point(clickPosition.X / CELLSIZE, clickPosition.Y / CELLSIZE);
-
-            gizmosDrawn = false;
-            gizmosPath = player.FindPath(player.FieldPosition, fieldClickPosition);
-            UpdateGizmosGraphics(clear: false);
-            UpdateGoalGraphics();
-
-            new Thread(() =>
+            if (e.Button == MouseButtons.Right)
             {
-                while (gizmosPath.Count > 0)
+                if (!isGameplayEnabled)
                 {
-                    bool changedX = player.FieldPosition.X != gizmosPath[0].X;
-                    bool offsetIsNatural = (changedX ? player.FieldPosition.X : player.FieldPosition.Y) < (changedX ? gizmosPath[0].X : gizmosPath[0].Y);
-                    int offsetsCount = 5;
-                    int offset = CELLSIZE / offsetsCount;
+                    isGameplayEnabled = true;
+                    return;
+                }
 
-                    for (int i = 1; i < offsetsCount; i++)
+                isGameplayEnabled = false;
+                Point clickPosition = e.Location;
+                Point fieldClickPosition = new Point(clickPosition.X / CELLSIZE, clickPosition.Y / CELLSIZE);
+
+                gizmosPath = player.FindPath(player.FieldPosition, fieldClickPosition);
+
+                new Thread(() =>
+                {
+                    while (gizmosPath.Count > 0)
                     {
-                        int totalOffset = offsetIsNatural ? offset : -offset;
-                        player.OffsetX = changedX ? totalOffset * i : 0;
-                        player.OffsetY = changedX ? 0 : totalOffset * i;
-                        DrawCreationFromAnotherThread(player);
-                        Thread.Sleep(25);
-                    }
+                        bool changedX = player.FieldPosition.X != gizmosPath[0].X;
+                        bool offsetIsNatural = (changedX ? player.FieldPosition.X : player.FieldPosition.Y) < (changedX ? gizmosPath[0].X : gizmosPath[0].Y);
+                        int offsetsCount = 5;
+                        int offset = CELLSIZE / offsetsCount;
 
-                    player.Move(gizmosPath[0]);
-                    gizmosPath.RemoveAt(0);
-
-                    player.OffsetX = 0;
-                    player.OffsetY = 0;
-                    DrawCreationFromAnotherThread(player);
-
-                    void DrawCreationFromAnotherThread(Creation creation)
-                    {
-                        Invoke(new Action(() =>
+                        for (int i = 1; i < offsetsCount; i++)
                         {
-                            pBox.Invalidate(new Rectangle(
-                                new Point(creation.RealPosition.X - CELLSIZE, creation.RealPosition.Y - CELLSIZE),
-                                new Size(creation.RealSize.Width + CELLSIZE * 2, creation.RealSize.Height + CELLSIZE * 2))
-                            );
-                        }));
+                            int totalOffset = offsetIsNatural ? offset : -offset;
+                            player.OffsetX = changedX ? totalOffset * i : 0;
+                            player.OffsetY = changedX ? 0 : totalOffset * i;
+                            DrawCreationFromAnotherThread(player);
+                            Thread.Sleep(25);
+                        }
+
+                        if (isGameplayEnabled)
+                        {
+                            gizmosPath.Clear();
+                            player.OffsetX = 0;
+                            player.OffsetY = 0;
+                            DrawCreationFromAnotherThread(player);
+                            break;
+                        }
+
+                        player.Move(gizmosPath[0]);
+                        gizmosPath.RemoveAt(0);
+
+                        player.OffsetX = 0;
+                        player.OffsetY = 0;
+                        DrawCreationFromAnotherThread(player);
+
+                        void DrawCreationFromAnotherThread(Creation creation)
+                        {
+                            try
+                            {
+                                Invoke(new Action(() =>
+                                {
+                                    DrawMap();
+                                }));
+                            }
+                            catch { }
+                        }
                     }
-                }
-                isGameplayEnabled = true;
-            }).Start();
-        }
-
-        private void UpdateGizmosGraphics(bool clear)
-        {
-            if (!drawGizmosPath)
-                return;
-
-            for (int i = gizmosPath.Count - 1; i >= 0; i--)
-            {
-                var gizmos = gizmosPath[i];
-                if (clear)
-                {
-                    changedCells.Add(gizmos);
-                    gizmosPath.Remove(gizmos);
-                }
-                pBox.Invalidate(new Rectangle(
-                    new Point(gizmos.X * CELLSIZE, gizmos.Y * CELLSIZE),
-                    new Size(CELLSIZE, CELLSIZE))
-                );
+                    isGameplayEnabled = true;
+                }).Start();
             }
-        }
-
-        private void UpdateGoalGraphics()
-        {
-            if (!drawGizmosGoal)
-                return;
-
-            Point goal = gizmosPath.LastOrDefault();
-            changedCells.Add(goal);
-            pBox.Invalidate(new Rectangle(
-                new Point(goal.X * CELLSIZE, goal.Y * CELLSIZE),
-                new Size(CELLSIZE, CELLSIZE))
-            );
         }
 
         public static Terrain GetTerrain(Point coords) => terrains.FirstOrDefault(x => x.FieldPosition == coords);
@@ -376,7 +313,6 @@ namespace PathFinder.Logic
                 {
                     Rgb rgb = new Rgb() { R = color.R, G = color.G, B = color.B };
                     Hsb hsb = rgb.To<Hsb>();
-                    //hsb.S = .5;
                     hsb.B = brightnessMap[x, y];
                     Color pixelColor = hsb.ToSystemColor();
                     if (brightnessMap[x, y] == 0)
