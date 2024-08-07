@@ -17,6 +17,8 @@ namespace PathFinder.Logic.GameObjects.Abstract
 
         public abstract bool CanUseWater { get; protected set; }
 
+        public List<Point> GizmosPath { get; set; } = new List<Point>();
+        public bool RequestToStop { get; set; }
         public int OffsetX { get; set; }
         public int OffsetY { get; set; }
         public Point OldFieldPosition { get; private set; }

@@ -20,6 +20,15 @@ namespace PathFinder.Logic
         public Point FieldPosition { get; protected set; }
         public Point RealPosition { get => new Point(FieldPosition.X * CELLSIZE, FieldPosition.Y * CELLSIZE); }
 
-        public abstract void Draw(Graphics g);
+        public void SafeDraw(Graphics g)
+        {
+            try
+            {
+                Draw(g);
+            }
+            catch { }
+        }
+
+        protected abstract void Draw(Graphics g);
     }
 }

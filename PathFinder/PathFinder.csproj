@@ -60,6 +60,7 @@
     <Compile Include="Logic\GameObjects\Terrains\Void.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Water.cs" />
     <Compile Include="Logic\GameObjects\GameObject.cs" />
+    <Compile Include="Logic\MouseLogic.cs" />
     <Compile Include="Logic\PFinder.cs">
       <SubType>Component</SubType>
     </Compile>

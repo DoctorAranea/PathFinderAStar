@@ -21,25 +21,16 @@ namespace PathFinder.Logic
         public static int FIELD_HEIGHT = 20;
         public static int CELLSIZE = 30;
 
-        public static bool isGameplayEnabled = true;
-        public static bool drawGizmosPath = true;
-        public static bool drawGizmosGoal = true;
-        public static Dictionary<string, float[,]> brightnessMaps;
-        private static List<Terrain> terrains;
-        private static List<Creation> creations;
-
-        private Player player;
+        private static PictureBox pBox;
 
         private string goalBitmapPath = "goal.png";
-        private Bitmap goalBitmap;
-
-        private PictureBox pBox;
-        private System.Windows.Forms.Timer timer;
+        private static Bitmap goalBitmap;
+        private static Bitmap backgroundBitmap;
 
         public PFinder(int fieldWidth, int fieldHeight) : base()
         {
             DoubleBuffered = true;
-            brightnessMaps = new Dictionary<string, float[,]>();
+            BrightnessMaps = new Dictionary<string, float[,]>();
 
             if (File.Exists(goalBitmapPath))
                 goalBitmap = new Bitmap(goalBitmapPath);
@@ -48,46 +39,123 @@ namespace PathFinder.Logic
             FIELD_HEIGHT = fieldHeight;
             GenerateMap();
 
-            player = new Player(Color.Red, new Point(4, 3));
+            SelectedObjects = new List<GameObject>();
 
-            creations = new List<Creation>();
-            creations.Add(player);
+            Creations = new List<Creation>();
+            Creations.Add(new Player(Color.Red, new Point(4, 3)));
+            Creations.Add(new Player(Color.Red, new Point(11, 6)));
 
             pBox = new PictureBox();
             pBox.Parent = this;
             pBox.Dock = DockStyle.Fill;
             pBox.MouseClick += PBox_MouseClick;
-
-            //timer = new System.Windows.Forms.Timer();
-            //timer.Interval = 250;
-            //timer.Tick += Timer_Tick;
-            //timer.Start();
+            pBox.MouseDown += PBox_MouseDown;
+            pBox.MouseUp += PBox_MouseUp;
+            pBox.MouseMove += PBox_MouseMove;
 
             DrawMap();
         }
 
+        public static Rectangle SelectedArea { get; set; }
+
+        public static bool DrawGizmosPath { get; set; } = true;
+        public static bool DrawGizmosGoal { get; set; } = true;
+
+        public static Dictionary<string, float[,]> BrightnessMaps { get; set; }
+
+        public static List<GameObject> SelectedObjects { get; set; }
+        public static List<Terrain> Terrains { get; set; }
+        public static List<Creation> Creations { get; set; }
         public static Terrain[,] TerrainMap
         {
             get
             {
                 Terrain[,] map = new Terrain[FIELD_WIDTH, FIELD_HEIGHT];
-                for (int i = 0; i < terrains.Count; i++)
+                for (int i = 0; i < Terrains.Count; i++)
                 {
-                    Terrain terra = terrains[i];
+                    Terrain terra = Terrains[i];
                     map[terra.FieldPosition.X, terra.FieldPosition.Y] = terra;
                 }
                 return map;
             }
         }
 
+
+        private void PBox_MouseClick(object sender, MouseEventArgs e) => MouseLogic.MouseClicked(this, sender, e);
+
+        private void PBox_MouseMove(object sender, MouseEventArgs e) => MouseLogic.MouseMoved(this, sender, e);
+
+        private void PBox_MouseUp(object sender, MouseEventArgs e) => MouseLogic.MouseUpped(this, sender, e);
+
+        private void PBox_MouseDown(object sender, MouseEventArgs e) => MouseLogic.MouseDowned(this, sender, e);
+
+
+        public static void DrawMap()
+        {
+            Bitmap world = new Bitmap(backgroundBitmap);
+            Graphics g = Graphics.FromImage(world);
+
+            for (int i = 0; i < Creations.Count; i++)
+            {
+                var gizmosPath = Creations[i].GizmosPath;
+
+                for (int j = 0; DrawGizmosPath && j < gizmosPath.Count - 1; j++)
+                {
+                    Point realPathPosition = GetRealPosition(gizmosPath[j]);
+                    realPathPosition.X += CELLSIZE / 2;
+                    realPathPosition.Y += CELLSIZE / 2;
+                    g.FillRectangle(new SolidBrush(Color.Lime), new Rectangle(realPathPosition.X - 3, realPathPosition.Y - 3, 6, 6));
+                }
+
+                if (DrawGizmosGoal && gizmosPath.Count > 0)
+                {
+                    Point gizmosGoal = gizmosPath.LastOrDefault();
+
+                    if (goalBitmap != default)
+                        g.DrawImage(goalBitmap, new Rectangle(GetRealPosition(gizmosGoal), new Size(CELLSIZE, CELLSIZE)));
+                    else
+                        g.DrawEllipse(new Pen(Color.Lime), new Rectangle(GetRealPosition(gizmosGoal), new Size(CELLSIZE - 1, CELLSIZE - 1)));
+                }
+            }
+
+            for (int i = 0; i < Creations.Count; i++)
+                Creations[i].SafeDraw(g);
+
+            for (int i = 0; i < SelectedObjects.Count; i++)
+            {
+                if (SelectedObjects[i] is Creation)
+                {
+                    Creation sObj = SelectedObjects[i] as Creation;
+                    Point offsetRealPosition = new Point
+                        (
+                            sObj.RealPosition.X + sObj.OffsetX,
+                            sObj.RealPosition.Y + sObj.OffsetY
+                        );
+                    g.DrawEllipse(new Pen(Color.Lime, 2), new Rectangle(offsetRealPosition, new Size(CELLSIZE - 1, CELLSIZE - 1)));
+                }
+                else
+                {
+                    GameObject sObj = SelectedObjects[i];
+                    g.DrawEllipse(new Pen(Color.Lime, 2), new Rectangle(sObj.RealPosition, new Size(CELLSIZE - 1, CELLSIZE - 1)));
+                }
+            }
+
+            if (SelectedArea != default)
+            {
+                g.DrawRectangle(new Pen(Color.Lime), new Rectangle(SelectedArea.X, SelectedArea.Y, SelectedArea.Width, SelectedArea.Height));
+            }
+
+            pBox.Image = world;
+        }
+
         private void GenerateMap()
         {
-            terrains = new List<Terrain>();
+            Terrains = new List<Terrain>();
 
             try
             {
-                bm_map = new Bitmap(FIELD_WIDTH * CELLSIZE, FIELD_HEIGHT * CELLSIZE);
-                Graphics g = Graphics.FromImage(bm_map);
+                backgroundBitmap = new Bitmap(FIELD_WIDTH * CELLSIZE, FIELD_HEIGHT * CELLSIZE);
+                Graphics g = Graphics.FromImage(backgroundBitmap);
 
                 string[] mapDataLines = File.ReadAllLines("map.dat");
 
@@ -102,13 +170,13 @@ namespace PathFinder.Logic
                         try { terrainChar = mapDataLines[mapDataY][mapDataX]; } catch { }
                         switch (terrainChar)
                         {
-                            case 'g': terrains.Add(new Grass(new Point(x, y))); break;
-                            case 'w': terrains.Add(new Water(new Point(x, y))); break;
-                            case 'r': terrains.Add(new Rock(new Point(x, y))); break;
-                            case 's': terrains.Add(new Sand(new Point(x, y))); break;
-                            case 'v': terrains.Add(new GameObjects.Terrains.Void(new Point(x, y))); break;
+                            case 'g': Terrains.Add(new Grass(new Point(x, y))); break;
+                            case 'w': Terrains.Add(new Water(new Point(x, y))); break;
+                            case 'r': Terrains.Add(new Rock(new Point(x, y))); break;
+                            case 's': Terrains.Add(new Sand(new Point(x, y))); break;
+                            case 'v': Terrains.Add(new GameObjects.Terrains.Void(new Point(x, y))); break;
                         }
-                        terrains.LastOrDefault().Draw(g);
+                        Terrains.LastOrDefault().SafeDraw(g);
                         mapDataX++;
                     }
                     mapDataY++;
@@ -117,137 +185,9 @@ namespace PathFinder.Logic
             catch { }
         }
 
-        //private void Timer_Tick(object sender, EventArgs e)
-        //{
-        //    //pBox.Invalidate();
-        //    timer.Stop();
-        //}
+        public static Point GetRealPosition(Point fieldPosition) => new Point(fieldPosition.X * CELLSIZE, fieldPosition.Y * CELLSIZE);
 
-        private List<Point> gizmosPath = new List<Point>();
-
-        private Bitmap bm_map;
-
-        private void DrawMap()
-        {
-            Bitmap world = new Bitmap(bm_map);
-            Graphics g = Graphics.FromImage(world);
-
-            for (int i = 0; i < gizmosPath.Count - 1; i++)
-            {
-                Point realPathPosition = GetRealPosition(gizmosPath[i]);
-                realPathPosition.X += CELLSIZE / 2;
-                realPathPosition.Y += CELLSIZE / 2;
-                g.FillRectangle(new SolidBrush(Color.Yellow), new Rectangle(realPathPosition.X - 3, realPathPosition.Y - 3, 6, 6));
-            }
-
-            if (gizmosPath.Count > 0)
-            {
-                Point gizmosGoal = gizmosPath.LastOrDefault();
-
-                if (goalBitmap != default)
-                    g.DrawImage(goalBitmap, new Rectangle(GetRealPosition(gizmosGoal), new Size(CELLSIZE, CELLSIZE)));
-                else
-                    g.DrawEllipse(new Pen(Color.Yellow), new Rectangle(GetRealPosition(gizmosGoal), new Size(CELLSIZE - 1, CELLSIZE - 1)));
-            }
-
-            for (int i = 0; i < creations.Count; i++)
-                creations[i].Draw(g);
-
-            pBox.Image = world;
-        }
-
-        private Point GetRealPosition(Point fieldPosition) => new Point(fieldPosition.X * CELLSIZE, fieldPosition.Y * CELLSIZE);
-
-        private void PBox_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                if (!isGameplayEnabled)
-                {
-                    isGameplayEnabled = true;
-                    return;
-                }
-
-                isGameplayEnabled = false;
-                Point clickPosition = e.Location;
-                Point fieldClickPosition = new Point(clickPosition.X / CELLSIZE, clickPosition.Y / CELLSIZE);
-
-                gizmosPath = player.FindPath(player.FieldPosition, fieldClickPosition);
-
-                new Thread(() =>
-                {
-                    while (gizmosPath.Count > 0)
-                    {
-                        bool changedX = player.FieldPosition.X != gizmosPath[0].X;
-                        bool offsetIsNatural = (changedX ? player.FieldPosition.X : player.FieldPosition.Y) < (changedX ? gizmosPath[0].X : gizmosPath[0].Y);
-                        int offsetsCount = 5;
-                        int offset = CELLSIZE / offsetsCount;
-
-                        for (int i = 1; i < offsetsCount; i++)
-                        {
-                            int totalOffset = offsetIsNatural ? offset : -offset;
-                            player.OffsetX = changedX ? totalOffset * i : 0;
-                            player.OffsetY = changedX ? 0 : totalOffset * i;
-                            DrawCreationFromAnotherThread(player);
-                            Thread.Sleep(25);
-                        }
-
-                        if (isGameplayEnabled)
-                        {
-                            gizmosPath.Clear();
-                            player.OffsetX = 0;
-                            player.OffsetY = 0;
-                            DrawCreationFromAnotherThread(player);
-                            break;
-                        }
-
-                        player.Move(gizmosPath[0]);
-                        gizmosPath.RemoveAt(0);
-
-                        player.OffsetX = 0;
-                        player.OffsetY = 0;
-                        DrawCreationFromAnotherThread(player);
-
-                        void DrawCreationFromAnotherThread(Creation creation)
-                        {
-                            try
-                            {
-                                Invoke(new Action(() =>
-                                {
-                                    DrawMap();
-                                }));
-                            }
-                            catch { }
-                        }
-                    }
-                    isGameplayEnabled = true;
-                }).Start();
-            }
-        }
-
-        public static Terrain GetTerrain(Point coords) => terrains.FirstOrDefault(x => x.FieldPosition == coords);
-
-        public static Terrain[,] GetNeighbors(Terrain terrain)
-        {
-            Terrain[,] neighbors = new Terrain[3, 3];
-            int nX;
-            int nY = 0;
-            for (int y = terrain.FieldPosition.Y - 1; y < terrain.FieldPosition.Y + 2; y++)
-            {
-                nX = 0;
-                for (int x = terrain.FieldPosition.X - 1; x < terrain.FieldPosition.X + 2; x++)
-                {
-                    if (x != terrain.FieldPosition.X || y != terrain.FieldPosition.Y)
-                    {
-                        Terrain neighbor = terrains.FirstOrDefault(t => t.FieldPosition == new Point(x, y));
-                        neighbors[nX, nY] = neighbor ?? terrain.CopyToNewCoords(new Point(x, y));
-                    }
-                    nX++;
-                }
-                nY++;
-            }
-            return neighbors;
-        }
+        public static Terrain GetTerrain(Point coords) => Terrains.FirstOrDefault(x => x.FieldPosition == coords);
 
         public static List<TerrainPathData> GetNeighborsList(TerrainPathData terrain)
         {
@@ -264,7 +204,7 @@ namespace PathFinder.Logic
                         if (x != terrain.fieldPosition.X && y != terrain.fieldPosition.Y)
                             continue;
 
-                        var neighborTerra = terrains.FirstOrDefault(t => t.FieldPosition == new Point(x, y));
+                        var neighborTerra = Terrains.FirstOrDefault(t => t.FieldPosition == new Point(x, y));
                         if (neighborTerra != null)
                         {
                             TerrainPathData neighbor = neighborTerra.ToSimplified();
@@ -280,7 +220,7 @@ namespace PathFinder.Logic
 
         public static void AddBrightnessMap(string name, float[,] brightnessMap)
         {
-            brightnessMaps.Add(name, brightnessMap);
+            BrightnessMaps.Add(name, brightnessMap);
         }
 
         public static float[,] GetBrightnessMap(string filename)

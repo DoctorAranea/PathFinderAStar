@@ -17,7 +17,7 @@ namespace PathFinder.Logic.GameObjects.Abstract
         {
             name = this.GetType().Name;
             string bmName = $"bm_{name}.png".ToLower();
-            if (!PFinder.brightnessMaps.ContainsKey(name) && File.Exists(bmName))
+            if (!PFinder.BrightnessMaps.ContainsKey(name) && File.Exists(bmName))
             {
                 var brightnessMap = PFinder.GetBrightnessMap(bmName);
                 PFinder.AddBrightnessMap(name, brightnessMap);
@@ -28,12 +28,12 @@ namespace PathFinder.Logic.GameObjects.Abstract
 
         public abstract Terrain CopyToNewCoords(Point coords);
 
-        public override void Draw(Graphics g)
+        protected override void Draw(Graphics g)
         {
             Size offsetSize = new Size(RealSize.Width + 1, RealSize.Height + 1);
-            if (PFinder.brightnessMaps.ContainsKey(name))
+            if (PFinder.BrightnessMaps.ContainsKey(name))
             {
-                Bitmap skin = PFinder.GetSkin(PFinder.brightnessMaps[name], TerrainColor);
+                Bitmap skin = PFinder.GetSkin(PFinder.BrightnessMaps[name], TerrainColor);
                 g.DrawImage(skin, new Rectangle(RealPosition, new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
             }
             else

@@ -63,7 +63,7 @@ namespace PathFinder.Logic.GameObjects.Creations
         }
 
         private string oldDirection = "right";
-        public override void Draw(Graphics g)
+        protected override void Draw(Graphics g)
         {
             Terrain terra = PFinder.GetTerrain(FieldPosition);
             string transport = terra.GetType().Name.ToLower() == "water" ? "boat" : "car";
@@ -83,9 +83,23 @@ namespace PathFinder.Logic.GameObjects.Creations
             else
                 DrawDefault(g);
 
+            void DrawImage(Graphics g, Image img)
+            { 
+                try 
+                { 
+                    g.DrawImage(img, new Rectangle(new Point(RealPosition.X + OffsetX, RealPosition.Y + OffsetY), new Size(PFinder.CELLSIZE, PFinder.CELLSIZE))); 
+                } 
+                catch { } 
+            }
 
-            void DrawImage(Graphics g, Image img) => g.DrawImage(img, new Rectangle(new Point(RealPosition.X + OffsetX, RealPosition.Y + OffsetY), new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
-            void DrawDefault(Graphics g) => g.FillEllipse(brush, new Rectangle(new Point(RealPosition.X + OffsetX, RealPosition.Y + OffsetY), RealSize));
+            void DrawDefault(Graphics g)
+            {
+                try 
+                { 
+                    g.FillEllipse(brush, new Rectangle(new Point(RealPosition.X + OffsetX, RealPosition.Y + OffsetY), RealSize)); 
+                } 
+                catch { }
+            }
         }
     }
 }

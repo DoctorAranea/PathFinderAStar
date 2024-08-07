@@ -17,15 +17,15 @@ namespace PathFinder.Logic.GameObjects.Terrains
 
         public override Terrain CopyToNewCoords(Point coords) => new Rock(coords);
 
-        public override void Draw(Graphics g)
+        protected override void Draw(Graphics g)
         {
             Size offsetSize = new Size(RealSize.Width + 1, RealSize.Height + 1);
-            if (PFinder.brightnessMaps.ContainsKey(name))
+            if (PFinder.BrightnessMaps.ContainsKey(name))
             {
                 Grass grass = new Grass(FieldPosition);
-                grass.Draw(g);
+                grass.SafeDraw(g);
 
-                Bitmap skin = PFinder.GetSkin(PFinder.brightnessMaps[name], TerrainColor);
+                Bitmap skin = PFinder.GetSkin(PFinder.BrightnessMaps[name], TerrainColor);
                 g.DrawImage(skin, new Rectangle(RealPosition, new Size(PFinder.CELLSIZE, PFinder.CELLSIZE)));
             }
             else
