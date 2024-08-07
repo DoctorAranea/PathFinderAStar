@@ -20,8 +20,10 @@ namespace PathFinder.Logic
         public static int FIELD_WIDTH = 20;
         public static int FIELD_HEIGHT = 20;
         public static int CELLSIZE = 30;
+        public static int PANEL_HEIGHT = 200;
 
-        private static PictureBox pBox;
+        private static PictureBox pBox_Game;
+        private static PictureBox pBox_Panel;
 
         private string goalBitmapPath = "goal.png";
         private static Bitmap goalBitmap;
@@ -30,6 +32,7 @@ namespace PathFinder.Logic
         public PFinder(int fieldWidth, int fieldHeight) : base()
         {
             DoubleBuffered = true;
+
             BrightnessMaps = new Dictionary<string, float[,]>();
 
             if (File.Exists(goalBitmapPath))
@@ -45,15 +48,29 @@ namespace PathFinder.Logic
             Creations.Add(new Player(Color.Red, new Point(4, 3)));
             Creations.Add(new Player(Color.Red, new Point(11, 6)));
 
-            pBox = new PictureBox();
-            pBox.Parent = this;
-            pBox.Dock = DockStyle.Fill;
-            pBox.MouseClick += PBox_MouseClick;
-            pBox.MouseDown += PBox_MouseDown;
-            pBox.MouseUp += PBox_MouseUp;
-            pBox.MouseMove += PBox_MouseMove;
+            pBox_Game = new PictureBox();
+            pBox_Game.Parent = this;
+            pBox_Game.Dock = DockStyle.Top;
+            pBox_Game.SizeMode = PictureBoxSizeMode.AutoSize;
+            pBox_Game.MouseClick += PBox_MouseClick;
+            pBox_Game.MouseDown += PBox_MouseDown;
+            pBox_Game.MouseUp += PBox_MouseUp;
+            pBox_Game.MouseMove += PBox_MouseMove;
+
+            pBox_Panel = new PictureBox();
+            pBox_Panel.Parent = this;
+            pBox_Panel.Size = new Size(pBox_Game.Size.Width, PANEL_HEIGHT);
+            pBox_Panel.Dock = DockStyle.Bottom;
+            pBox_Panel.SizeMode = PictureBoxSizeMode.AutoSize;
+            pBox_Panel.Paint += PBox_Panel_Paint;
 
             DrawMap();
+        }
+
+        private void PBox_Panel_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.Clear(Color.Black);
         }
 
         public static Rectangle SelectedArea { get; set; }
@@ -145,7 +162,7 @@ namespace PathFinder.Logic
                 g.DrawRectangle(new Pen(Color.Lime), new Rectangle(SelectedArea.X, SelectedArea.Y, SelectedArea.Width, SelectedArea.Height));
             }
 
-            pBox.Image = world;
+            pBox_Game.Image = world;
         }
 
         private void GenerateMap()

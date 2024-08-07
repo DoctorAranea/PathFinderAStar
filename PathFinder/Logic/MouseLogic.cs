@@ -71,10 +71,8 @@ namespace PathFinder.Logic
                     {
                         creation.OffsetX = 0;
                         creation.OffsetY = 0;
-                        DrawCreationFromAnotherThread();
-
                         creation.GizmosPath.Clear();
-                        DrawMap();
+                        DrawCreationFromAnotherThread();
                         break;
                     }
 
@@ -153,7 +151,7 @@ namespace PathFinder.Logic
 
                     SelectedObjects.Clear();
 
-                    Creation[] selectedCreations = Creations.Where(x => SelectedArea.Contains(x.RealPosition)).ToArray();
+                    Creation[] selectedCreations = Creations.Where(x => SelectedArea.Contains(new Point(x.RealPosition.X + CELLSIZE / 2, x.RealPosition.Y + CELLSIZE / 2))).ToArray();
                     if (selectedCreations != null && selectedCreations.Length > 0)
                         SelectedObjects.AddRange(selectedCreations);
 

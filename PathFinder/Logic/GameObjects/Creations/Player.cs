@@ -39,6 +39,8 @@ namespace PathFinder.Logic.GameObjects.Creations
             }
         }
 
+        public override string Name { get; } = "Игрок";
+
         public override bool CanUseWater { get; protected set; } = true;
 
         public IEnumerable<(string, BitmapHaver)> GetAllBitmaps()

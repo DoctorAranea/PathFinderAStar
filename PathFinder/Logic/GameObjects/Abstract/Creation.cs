@@ -10,6 +10,7 @@ namespace PathFinder.Logic.GameObjects.Abstract
 {
     public abstract class Creation : GameObject
     {
+
         protected Creation(Point fieldPosition) : base(fieldPosition)
         {
             OldFieldPosition = fieldPosition;
