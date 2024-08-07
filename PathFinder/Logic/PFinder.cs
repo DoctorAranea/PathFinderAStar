@@ -29,6 +29,8 @@ namespace PathFinder.Logic
         private static Bitmap goalBitmap;
         private static Bitmap backgroundBitmap;
 
+        private static Rectangle selectedArea;
+
         public PFinder(int fieldWidth, int fieldHeight) : base()
         {
             DoubleBuffered = true;
@@ -71,9 +73,22 @@ namespace PathFinder.Logic
         {
             Graphics g = e.Graphics;
             g.Clear(Color.Black);
+
+            if (SelectedObjects.Count > 0)
+            {
+                g.DrawString(SelectedObjects[0].Name, new Font("Comic Sans MS", 20, FontStyle.Bold), new SolidBrush(Color.White), 10, 20);
+            }
         }
 
-        public static Rectangle SelectedArea { get; set; }
+        public static Rectangle SelectedArea 
+        { 
+            get => selectedArea; 
+            set
+            {
+                selectedArea = value;
+                pBox_Panel.Refresh();
+            }
+        }
 
         public static bool DrawGizmosPath { get; set; } = true;
         public static bool DrawGizmosGoal { get; set; } = true;
