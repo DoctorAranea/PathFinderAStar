@@ -24,10 +24,15 @@ namespace PathFinder.Logic
 
         private static PictureBox pBox_Game;
         private static PictureBox pBox_Panel;
+        //private static PictureBox pBox_MMap;
 
-        private string goalBitmapPath = "goal.png";
+        private string goalBitmapPath = "s_goal.png";
         private static Bitmap goalBitmap;
         private static Bitmap backgroundBitmap;
+
+        private string panelBitmapFile = "s_panel.png";
+        private string iconEmptyFile = "icons\\icon_empty.png";
+        private string iconUnknownFile = "icons\\icon_unknown.png";
 
         private static Rectangle selectedArea;
 
@@ -37,18 +42,29 @@ namespace PathFinder.Logic
 
             BrightnessMaps = new Dictionary<string, float[,]>();
 
+            if (File.Exists(panelBitmapFile))
+                PanelBitmap = new Bitmap(panelBitmapFile);
+
             if (File.Exists(goalBitmapPath))
                 goalBitmap = new Bitmap(goalBitmapPath);
+
+            if (File.Exists(iconEmptyFile))
+                IconEmpty = new Bitmap(iconEmptyFile);
+
+            if (File.Exists(iconUnknownFile))
+                IconUnknown = new Bitmap(iconUnknownFile);
 
             FIELD_WIDTH = fieldWidth;
             FIELD_HEIGHT = fieldHeight;
             GenerateMap();
 
+            PanelLogic.InitializeIcons();
+
             SelectedObjects = new List<GameObject>();
 
             Creations = new List<Creation>();
-            Creations.Add(new Player(Color.Red, new Point(4, 3)));
-            Creations.Add(new Player(Color.Red, new Point(11, 6)));
+            Creations.Add(new Player(Color.Red, new Point(4, 3), "Игорь"));
+            Creations.Add(new Player(Color.Red, new Point(11, 6), "Евгений"));
 
             pBox_Game = new PictureBox();
             pBox_Game.Parent = this;
@@ -64,31 +80,31 @@ namespace PathFinder.Logic
             pBox_Panel.Size = new Size(pBox_Game.Size.Width, PANEL_HEIGHT);
             pBox_Panel.Dock = DockStyle.Bottom;
             pBox_Panel.SizeMode = PictureBoxSizeMode.AutoSize;
-            pBox_Panel.Paint += PBox_Panel_Paint;
+            pBox_Panel.Paint += PanelLogic.PBox_Panel_Paint;
+            pBox_Panel.MouseClick += PanelLogic.PBox_MouseClick;
+
+            //pBox_MMap = new PictureBox();
+            //pBox_MMap.Parent = this;
+            //pBox_MMap.Size = new Size(pBox_Game.Size.Width, PANEL_HEIGHT);
+            //pBox_MMap.Location();
+            //pBox_MMap.SizeMode = PictureBoxSizeMode.AutoSize;
 
             DrawMap();
         }
 
-        private void PBox_Panel_Paint(object sender, PaintEventArgs e)
+        public static Rectangle SelectedArea
         {
-            Graphics g = e.Graphics;
-            g.Clear(Color.Black);
-
-            if (SelectedObjects.Count > 0)
-            {
-                g.DrawString(SelectedObjects[0].Name, new Font("Comic Sans MS", 20, FontStyle.Bold), new SolidBrush(Color.White), 10, 20);
-            }
-        }
-
-        public static Rectangle SelectedArea 
-        { 
-            get => selectedArea; 
+            get => selectedArea;
             set
             {
                 selectedArea = value;
-                pBox_Panel.Refresh();
+                SelectedObjectInPanel = 0;
+                DrawPanel();
             }
         }
+        public static Bitmap PanelBitmap { get; private set; }
+        public static Bitmap IconEmpty { get; private set; }
+        public static Bitmap IconUnknown { get; private set; }
 
         public static bool DrawGizmosPath { get; set; } = true;
         public static bool DrawGizmosGoal { get; set; } = true;
@@ -96,6 +112,7 @@ namespace PathFinder.Logic
         public static Dictionary<string, float[,]> BrightnessMaps { get; set; }
 
         public static List<GameObject> SelectedObjects { get; set; }
+        public static int SelectedObjectInPanel { get; set; }
         public static List<Terrain> Terrains { get; set; }
         public static List<Creation> Creations { get; set; }
         public static Terrain[,] TerrainMap
@@ -129,6 +146,9 @@ namespace PathFinder.Logic
 
             for (int i = 0; i < Creations.Count; i++)
             {
+                if (!SelectedObjects.Contains(Creations[i]))
+                    continue;
+
                 var gizmosPath = Creations[i].GizmosPath;
 
                 for (int j = 0; DrawGizmosPath && j < gizmosPath.Count - 1; j++)
@@ -178,6 +198,11 @@ namespace PathFinder.Logic
             }
 
             pBox_Game.Image = world;
+        }
+
+        public static void DrawPanel()
+        {
+            pBox_Panel.Refresh();
         }
 
         private void GenerateMap()

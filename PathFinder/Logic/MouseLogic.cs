@@ -153,7 +153,8 @@ namespace PathFinder.Logic
 
                     Creation[] selectedCreations = Creations.Where(x => SelectedArea.Contains(new Point(x.RealPosition.X + CELLSIZE / 2, x.RealPosition.Y + CELLSIZE / 2))).ToArray();
                     if (selectedCreations != null && selectedCreations.Length > 0)
-                        SelectedObjects.AddRange(selectedCreations);
+                        for (int i = 0; i < selectedCreations.Length && i < 12; i++)
+                            SelectedObjects.Add(selectedCreations[i]);
 
                     DrawMap();
                 }

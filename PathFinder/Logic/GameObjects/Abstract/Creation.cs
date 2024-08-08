@@ -10,9 +10,10 @@ namespace PathFinder.Logic.GameObjects.Abstract
 {
     public abstract class Creation : GameObject
     {
-
-        protected Creation(Point fieldPosition) : base(fieldPosition)
+        protected Creation(Point fieldPosition, string customName = "") : base(fieldPosition)
         {
+            if (customName != "")
+                Name = customName;
             OldFieldPosition = fieldPosition;
         }
 

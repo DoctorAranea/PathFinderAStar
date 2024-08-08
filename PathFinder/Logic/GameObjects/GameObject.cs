@@ -13,7 +13,9 @@ namespace PathFinder.Logic
             FieldSize = fieldSize;
             FieldPosition = fieldPosition;
         }
-        public abstract string Name { get; }
+
+        public abstract string Name { get; protected set; }
+        public abstract Bitmap Icon { get; protected set; }
 
         public Size FieldSize { get; protected set; }
         public Size RealSize { get => new Size(FieldSize.Width * CELLSIZE, FieldSize.Height * CELLSIZE); }

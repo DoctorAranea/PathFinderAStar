@@ -12,7 +12,8 @@ namespace PathFinder.Logic.GameObjects.Terrains
     {
         public Rock(Point fieldPosition) : base(fieldPosition) { }
 
-        public override string Name { get; } = "Скалы";
+        public override string Name { get; protected set; } = "Скалы";
+        public override Bitmap Icon { get; protected set; }
 
         public override float MoveDifficulty { get; protected set; } = 999f;
         public override Color TerrainColor { get; protected set; } = Color.Gray;

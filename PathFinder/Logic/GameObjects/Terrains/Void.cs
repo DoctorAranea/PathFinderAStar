@@ -12,7 +12,8 @@ namespace PathFinder.Logic.GameObjects.Terrains
     {
         public Void(Point fieldPosition) : base(fieldPosition) { }
 
-        public override string Name { get; } = "Terra Incognita";
+        public override string Name { get; protected set; } = "Terra Incognita";
+        public override Bitmap Icon { get; protected set; }
 
         public override float MoveDifficulty { get; protected set; } = 999f;
         public override Color TerrainColor { get; protected set; } = Color.Black;

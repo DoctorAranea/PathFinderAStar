@@ -12,7 +12,8 @@ namespace PathFinder.Logic.GameObjects.Terrains
     {
         public Water(Point fieldPosition) : base(fieldPosition) { }
 
-        public override string Name { get; } = "Вода";
+        public override string Name { get; protected set; } = "Вода";
+        public override Bitmap Icon { get; protected set; }
 
         public override float MoveDifficulty { get; protected set; } = 2f;
         public override Color TerrainColor { get; protected set; } = Color.Blue;

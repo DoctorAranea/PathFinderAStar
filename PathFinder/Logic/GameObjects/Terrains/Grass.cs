@@ -12,7 +12,8 @@ namespace PathFinder.Logic.GameObjects.Terrains
     {
         public Grass(Point fieldPosition) : base(fieldPosition) { }
 
-        public override string Name { get; } = "Трава";
+        public override string Name { get; protected set; } = "Трава";
+        public override Bitmap Icon { get; protected set; }
 
         public override float MoveDifficulty { get; protected set; } = 1f;
         public override Color TerrainColor { get; protected set; } = Color.Green;

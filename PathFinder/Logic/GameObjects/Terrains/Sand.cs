@@ -12,7 +12,8 @@ namespace PathFinder.Logic.GameObjects.Terrains
     {
         public Sand(Point fieldPosition) : base(fieldPosition) { }
 
-        public override string Name { get; } = "Песок";
+        public override string Name { get; protected set; } = "Песок";
+        public override Bitmap Icon { get; protected set; }
 
         public override float MoveDifficulty { get; protected set; } = 1.5f;
         public override Color TerrainColor { get; protected set; } = Color.FromArgb(239, 210, 96);

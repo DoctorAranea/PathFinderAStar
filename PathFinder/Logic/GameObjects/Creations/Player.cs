@@ -27,9 +27,14 @@ namespace PathFinder.Logic.GameObjects.Creations
         private BitmapHaver sCarDown = new BitmapHaver();
         private BitmapHaver sCarUp = new BitmapHaver();
 
-        public Player(Color color, Point fieldPosition) : base(fieldPosition)
+        public Player(Color color, Point fieldPosition, string customMame = "") : base(fieldPosition, customMame)
         {
             brush = new SolidBrush(color);
+
+            string iconFile = "icons\\icon_player.png";
+            if (File.Exists(iconFile))
+                Icon = new Bitmap(iconFile);
+
             IEnumerable<(string name, BitmapHaver bmpHaver)> allBitmaps = GetAllBitmaps();
             for (int i = 0; i < allBitmaps.Count(); i++)
             {
@@ -39,7 +44,8 @@ namespace PathFinder.Logic.GameObjects.Creations
             }
         }
 
-        public override string Name { get; } = "Игрок";
+        public override string Name { get; protected set; } = "Игрок";
+        public override Bitmap Icon { get; protected set; }
 
         public override bool CanUseWater { get; protected set; } = true;
 
