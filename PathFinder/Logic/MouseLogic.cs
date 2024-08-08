@@ -24,11 +24,14 @@ namespace PathFinder.Logic
 
             if (startClickPosition == fieldClickPosition && e.Button == MouseButtons.Left)
             {
-                SelectedObjects.Clear();
+                if (SelectedAbilityInPanel == -1)
+                {
+                    SelectedObjects.Clear();
 
-                Creation selectedCreation = Creations.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
-                if (selectedCreation != null)
-                    SelectedObjects.Add(selectedCreation);
+                    Creation selectedCreation = Creations.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
+                    if (selectedCreation != null)
+                        SelectedObjects.Add(selectedCreation);
+                }
 
                 DrawMap();
             }
@@ -37,6 +40,8 @@ namespace PathFinder.Logic
                 for (int i = 0; i < SelectedObjects.Count; i++)
                     StartMoving(pFinder, SelectedObjects[i] as Creation, fieldClickPosition);
             }
+
+            SelectedAbilityInPanel = -1;
         }
 
         public static void StartMoving(PFinder pFinder, Creation creation, Point endPosition)
@@ -102,12 +107,42 @@ namespace PathFinder.Logic
         {
             if (e.Button == MouseButtons.Left)
             {
+                if (SelectedAbilityInPanel != -1)
+                {
+                    if (SelectedObjects.Count > 0)
+                    {
+                        Point clickPosition = e.Location;
+                        Point fieldClickPosition = new Point(clickPosition.X / CELLSIZE, clickPosition.Y / CELLSIZE);
+
+                        GameObject receiver = Creations.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
+                        if (receiver == null) receiver = GetTerrain(fieldClickPosition);
+
+                        var output = SelectedObjects[SelectedObjectInPanel].Commands[SelectedAbilityInPanel].Run(new Command.InputParameters()
+                        {
+                            sender = SelectedObjects[SelectedObjectInPanel],
+                            receiver = receiver
+                        });
+
+                        if (output.result)
+                        {
+                            DrawPanel();
+                        }
+                        else
+                        {
+                            MessageBox.Show(output.resultText);
+                            SelectedArea = default;
+                            return;
+                        }
+                    }
+                }
+
                 mouseDown = true;
                 startPos = new Point
                 (
                     e.Location.X,
                     e.Location.Y
                 );
+
                 SelectedArea = new Rectangle(startPos, new Size(1, 1));
             }
         }

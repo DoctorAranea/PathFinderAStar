@@ -98,7 +98,8 @@ namespace PathFinder.Logic
             set
             {
                 selectedArea = value;
-                SelectedObjectInPanel = 0;
+                //SelectedObjectInPanel = 0;
+                //SelectedAbilityInPanel = -1;
                 DrawPanel();
             }
         }
@@ -113,6 +114,7 @@ namespace PathFinder.Logic
 
         public static List<GameObject> SelectedObjects { get; set; }
         public static int SelectedObjectInPanel { get; set; }
+        public static int SelectedAbilityInPanel { get; set; } = -1;
         public static List<Terrain> Terrains { get; set; }
         public static List<Creation> Creations { get; set; }
         public static Terrain[,] TerrainMap
@@ -203,6 +205,13 @@ namespace PathFinder.Logic
         public static void DrawPanel()
         {
             pBox_Panel.Refresh();
+        }
+
+        public static void UpdateTerrain(Terrain terrain)
+        {
+            Graphics g = Graphics.FromImage(backgroundBitmap);
+            terrain.SafeDraw(g);
+            DrawMap();
         }
 
         private void GenerateMap()

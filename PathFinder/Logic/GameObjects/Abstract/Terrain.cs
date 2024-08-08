@@ -23,6 +23,8 @@ namespace PathFinder.Logic.GameObjects.Abstract
                 PFinder.AddBrightnessMap(name, brightnessMap);
             }
         }
+
+        public override List<Command> Commands { get; set; } = new List<Command>();
         public abstract float MoveDifficulty { get; protected set; }
         public abstract Color TerrainColor { get; protected set; }
 

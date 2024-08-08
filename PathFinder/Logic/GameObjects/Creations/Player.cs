@@ -1,4 +1,5 @@
-﻿using PathFinder.Logic.GameObjects.Abstract;
+﻿using PathFinder.Logic.Commands;
+using PathFinder.Logic.GameObjects.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -46,6 +47,10 @@ namespace PathFinder.Logic.GameObjects.Creations
 
         public override string Name { get; protected set; } = "Игрок";
         public override Bitmap Icon { get; protected set; }
+        public override List<Command> Commands { get; set; } = new List<Command>()
+        {
+            new CallOfVoid()
+        };
 
         public override bool CanUseWater { get; protected set; } = true;
 

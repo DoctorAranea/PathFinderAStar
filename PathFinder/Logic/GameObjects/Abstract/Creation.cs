@@ -17,6 +17,8 @@ namespace PathFinder.Logic.GameObjects.Abstract
             OldFieldPosition = fieldPosition;
         }
 
+        public override List<Command> Commands { get; set; } = new List<Command>();
+
         public abstract bool CanUseWater { get; protected set; }
 
         public List<Point> GizmosPath { get; set; } = new List<Point>();

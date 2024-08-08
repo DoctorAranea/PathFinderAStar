@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logic\Command.cs" />
+    <Compile Include="Logic\Commands\CallOfVoid.cs" />
     <Compile Include="Logic\GameObjects\Abstract\Creation.cs" />
     <Compile Include="Logic\GameObjects\Creations\Player.cs" />
     <Compile Include="Logic\GameObjects\Abstract\Terrain.cs" />
@@ -99,5 +101,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
