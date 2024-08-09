@@ -66,6 +66,8 @@ namespace PathFinder.Logic
             Creations.Add(new Player(Color.Red, new Point(4, 3), "Игорь"));
             Creations.Add(new Player(Color.Red, new Point(11, 6), "Евгений"));
 
+            Buildings = new List<Building>();
+
             pBox_Game = new PictureBox();
             pBox_Game.Parent = this;
             pBox_Game.Dock = DockStyle.Top;
@@ -117,6 +119,7 @@ namespace PathFinder.Logic
         public static int SelectedAbilityInPanel { get; set; } = -1;
         public static List<Terrain> Terrains { get; set; }
         public static List<Creation> Creations { get; set; }
+        public static List<Building> Buildings { get; set; }
         public static Terrain[,] TerrainMap
         {
             get
@@ -174,6 +177,9 @@ namespace PathFinder.Logic
 
             for (int i = 0; i < Creations.Count; i++)
                 Creations[i].SafeDraw(g);
+
+            for (int i = 0; i < Buildings.Count; i++)
+                Buildings[i].SafeDraw(g);
 
             for (int i = 0; i < SelectedObjects.Count; i++)
             {
@@ -238,6 +244,7 @@ namespace PathFinder.Logic
                         {
                             case 'g': Terrains.Add(new Grass(new Point(x, y))); break;
                             case 'w': Terrains.Add(new Water(new Point(x, y))); break;
+                            case 'o': Terrains.Add(new Oil(new Point(x, y))); break;
                             case 'r': Terrains.Add(new Rock(new Point(x, y))); break;
                             case 's': Terrains.Add(new Sand(new Point(x, y))); break;
                             case 'v': Terrains.Add(new GameObjects.Terrains.Void(new Point(x, y))); break;

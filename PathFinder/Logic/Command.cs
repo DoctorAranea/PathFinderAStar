@@ -26,6 +26,8 @@ namespace PathFinder.Logic
 
         protected abstract string IconPath { get; set; } 
         public abstract Bitmap Icon { get; protected set; } 
+        public abstract string Title { get; protected set; } 
+        public abstract string Description { get; protected set; } 
 
         public abstract OutputParameters Run(InputParameters input);
     }

@@ -1,4 +1,5 @@
-﻿using PathFinder.Logic.GameObjects.Abstract;
+﻿using PathFinder.Logic.GameObjects;
+using PathFinder.Logic.GameObjects.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,14 +32,32 @@ namespace PathFinder.Logic
                     Creation selectedCreation = Creations.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
                     if (selectedCreation != null)
                         SelectedObjects.Add(selectedCreation);
+                    else
+                    {
+                        Building selectedBuilding = Buildings.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
+                        if (selectedBuilding != null)
+                            SelectedObjects.Add(selectedBuilding);
+                    }
                 }
 
                 DrawMap();
             }
             else if (SelectedObjects.Count > 0 && e.Button == MouseButtons.Right)
             {
-                for (int i = 0; i < SelectedObjects.Count; i++)
-                    StartMoving(pFinder, SelectedObjects[i] as Creation, fieldClickPosition);
+                Building building = Buildings.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
+                if (building != null)
+                {
+
+                }
+                else
+                {
+                    for (int i = 0; i < SelectedObjects.Count; i++)
+                    {
+                        if (SelectedObjects[i] is Creation)
+                            StartMoving(pFinder, SelectedObjects[i] as Creation, fieldClickPosition);
+                    }
+                }
+
             }
 
             SelectedAbilityInPanel = -1;
@@ -115,6 +134,7 @@ namespace PathFinder.Logic
                         Point fieldClickPosition = new Point(clickPosition.X / CELLSIZE, clickPosition.Y / CELLSIZE);
 
                         GameObject receiver = Creations.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
+                        if (receiver == null) receiver = Buildings.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
                         if (receiver == null) receiver = GetTerrain(fieldClickPosition);
 
                         var output = SelectedObjects[SelectedObjectInPanel].Commands[SelectedAbilityInPanel].Run(new Command.InputParameters()

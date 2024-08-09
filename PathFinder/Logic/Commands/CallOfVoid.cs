@@ -12,6 +12,8 @@ namespace PathFinder.Logic.Commands
     {
         protected override string IconPath { get; set; } = "icons\\abilityIcon_callOfVoid.png";
         public override Bitmap Icon { get; protected set; }
+        public override string Title { get; protected set; } = "Зов Пустоты";
+        public override string Description { get; protected set; } = "Обращение местности в Пустоту";
 
         public override OutputParameters Run(InputParameters input)
         {

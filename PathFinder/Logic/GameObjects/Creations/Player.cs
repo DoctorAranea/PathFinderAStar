@@ -12,11 +12,6 @@ namespace PathFinder.Logic.GameObjects.Creations
 {
     public class Player : Creation
     {
-        public class BitmapHaver
-        {
-            public Bitmap bmp;
-        }
-
         public SolidBrush brush;
 
         private BitmapHaver sBoatLeft = new BitmapHaver();
@@ -46,10 +41,12 @@ namespace PathFinder.Logic.GameObjects.Creations
         }
 
         public override string Name { get; protected set; } = "Игрок";
+        public override string Description { get; protected set; } = "Первозданное существо";
         public override Bitmap Icon { get; protected set; }
         public override List<Command> Commands { get; set; } = new List<Command>()
         {
-            new CallOfVoid()
+            new CallOfVoid(),
+            new BuildOilStation()
         };
 
         public override bool CanUseWater { get; protected set; } = true;

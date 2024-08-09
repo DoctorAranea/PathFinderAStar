@@ -7,6 +7,11 @@ namespace PathFinder.Logic
 {
     public abstract class GameObject
     {
+        public class BitmapHaver
+        {
+            public Bitmap bmp;
+        }
+
         protected GameObject(Point fieldPosition, Size fieldSize = default)
         {
             if (fieldSize == default)
@@ -17,6 +22,7 @@ namespace PathFinder.Logic
         }
 
         public abstract string Name { get; protected set; }
+        public abstract string Description { get; protected set; }
         public abstract Bitmap Icon { get; protected set; }
 
         public abstract List<Command> Commands { get; set; }

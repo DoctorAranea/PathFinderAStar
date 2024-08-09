@@ -24,6 +24,7 @@ namespace PathFinder.Logic.GameObjects.Abstract
             }
         }
 
+        public override string Description { get; protected set; } = "Местность";
         public override List<Command> Commands { get; set; } = new List<Command>();
         public abstract float MoveDifficulty { get; protected set; }
         public abstract Color TerrainColor { get; protected set; }

@@ -16,7 +16,7 @@ namespace PathFinder.Logic.GameObjects.Terrains
         public override Bitmap Icon { get; protected set; }
 
         public override float MoveDifficulty { get; protected set; } = 999f;
-        public override Color TerrainColor { get; protected set; } = Color.Black;
+        public override Color TerrainColor { get; protected set; } = Color.White;
 
         public override Terrain CopyToNewCoords(Point coords) => new Void(coords);
     }

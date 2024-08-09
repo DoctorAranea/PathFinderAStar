@@ -109,11 +109,16 @@ namespace PathFinder.Logic
 
             if (SelectedObjects.Count > 0)
             {
+                if (SelectedObjectInPanel >= SelectedObjects.Count)
+                    SelectedObjectInPanel = 0;
+
                 Bitmap iconBitmap = SelectedObjects[SelectedObjectInPanel].Icon;
                 if (iconBitmap == default)
                     iconBitmap = IconUnknown;
 
                 g.DrawString(SelectedObjects[SelectedObjectInPanel].Name, new Font("Comic Sans MS", 20, FontStyle.Bold), new SolidBrush(Color.White), 20, 20);
+                g.DrawString(SelectedObjects[SelectedObjectInPanel].Description, new Font("Comic Sans MS", 12, FontStyle.Bold), new SolidBrush(Color.Gray), new Rectangle(20, 70, 300, PANEL_HEIGHT - 70 - 20));
+
                 g.DrawImage(iconBitmap, new Rectangle(new Point
                     (
                         iconSize.Width * selectionIcons[SelectedObjectInPanel].column + selectionIconsOffset.X - selectingIconSize.Width,
@@ -152,6 +157,9 @@ namespace PathFinder.Logic
 
         internal static void PBox_MouseClick(object sender, MouseEventArgs e)
         {
+            if (SelectedObjects.Count == 0)
+                return;
+
             int selectedItemIndex = selectionIcons.FindIndex(x => x.rect.Contains(e.Location));
             if (selectedItemIndex >= 0 && selectedItemIndex < SelectedObjects.Count)
             {
