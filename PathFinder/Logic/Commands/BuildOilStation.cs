@@ -14,8 +14,12 @@ namespace PathFinder.Logic.Commands
         public override Bitmap Icon { get; protected set; }
         public override string Title { get; protected set; } = "Построить нефтяную платформу";
         public override string Description { get; protected set; } = "Строительство нефтяной вышки в океане для добычи нефти";
+        protected override List<(Type, int)> Costs { get; set; } = new List<(Type, int)>()
+        {
+            (typeof(Resources.Oil), 30)
+        };
 
-        public override OutputParameters Run(InputParameters input)
+        protected override OutputParameters Run(InputParameters input)
         {
             if (!(input.receiver is GameObjects.Terrains.OilSource))
             {

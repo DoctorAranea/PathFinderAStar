@@ -77,6 +77,9 @@ namespace PathFinder.Logic
             Resources = new List<Resource>()
             {
                 new Oil()
+                {
+                    Value = 30
+                }
             };
 
             pBox_Game = new PictureBox();
@@ -170,7 +173,6 @@ namespace PathFinder.Logic
                 return map;
             }
         }
-
 
         private void PBox_MouseClick(object sender, MouseEventArgs e) => MouseLogic.MouseClicked(this, sender, e);
 

@@ -137,7 +137,7 @@ namespace PathFinder.Logic
                         if (receiver == null) receiver = Buildings.FirstOrDefault(x => x.FieldPosition == fieldClickPosition);
                         if (receiver == null) receiver = GetTerrain(fieldClickPosition);
 
-                        var output = SelectedObjects[SelectedObjectInPanel].Commands[SelectedAbilityInPanel].Run(new Command.InputParameters()
+                        var output = SelectedObjects[SelectedObjectInPanel].Commands[SelectedAbilityInPanel].Use(new Command.InputParameters()
                         {
                             sender = SelectedObjects[SelectedObjectInPanel],
                             receiver = receiver

@@ -14,8 +14,9 @@ namespace PathFinder.Logic.Commands
         public override Bitmap Icon { get; protected set; }
         public override string Title { get; protected set; } = "Зов Пустоты";
         public override string Description { get; protected set; } = "Обращение местности в Пустоту";
+        protected override List<(Type, int)> Costs { get; set; } = new List<(Type, int)>();
 
-        public override OutputParameters Run(InputParameters input)
+        protected override OutputParameters Run(InputParameters input)
         {
             if (!(input.receiver is Terrain))
             {
