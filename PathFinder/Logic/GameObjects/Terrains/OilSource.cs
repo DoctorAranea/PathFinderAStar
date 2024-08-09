@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PathFinder.Logic.GameObjects.Terrains
 {
-    public class Oil : Terrain
+    public class OilSource : Terrain
     {
-        public Oil(Point fieldPosition) : base(fieldPosition) { }
+        public OilSource(Point fieldPosition) : base(fieldPosition) { }
 
         public override string Name { get; protected set; } = "Нефть";
         public override Bitmap Icon { get; protected set; }

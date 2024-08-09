@@ -3,6 +3,7 @@ using PathFinder.Logic.GameObjects;
 using PathFinder.Logic.GameObjects.Abstract;
 using PathFinder.Logic.GameObjects.Creations;
 using PathFinder.Logic.GameObjects.Terrains;
+using PathFinder.Logic.Resources;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,17 +21,20 @@ namespace PathFinder.Logic
         public static int FIELD_WIDTH = 20;
         public static int FIELD_HEIGHT = 20;
         public static int CELLSIZE = 30;
+        public static int PANELRES_HEIGHT = 30;
         public static int PANEL_HEIGHT = 200;
 
+        private static PictureBox pBox_PanelRes;
         private static PictureBox pBox_Game;
         private static PictureBox pBox_Panel;
-        //private static PictureBox pBox_MMap;
+        private static System.Windows.Forms.Timer resourceTimer;
 
         private string goalBitmapPath = "s_goal.png";
         private static Bitmap goalBitmap;
         private static Bitmap backgroundBitmap;
 
         private string panelBitmapFile = "s_panel.png";
+        private string panelResBitmapFile = "s_panelRes.png";
         private string iconEmptyFile = "icons\\icon_empty.png";
         private string iconUnknownFile = "icons\\icon_unknown.png";
 
@@ -44,6 +48,9 @@ namespace PathFinder.Logic
 
             if (File.Exists(panelBitmapFile))
                 PanelBitmap = new Bitmap(panelBitmapFile);
+
+            if (File.Exists(panelResBitmapFile))
+                PanelResBitmap = new Bitmap(panelResBitmapFile);
 
             if (File.Exists(goalBitmapPath))
                 goalBitmap = new Bitmap(goalBitmapPath);
@@ -67,6 +74,10 @@ namespace PathFinder.Logic
             Creations.Add(new Player(Color.Red, new Point(11, 6), "Евгений"));
 
             Buildings = new List<Building>();
+            Resources = new List<Resource>()
+            {
+                new Oil()
+            };
 
             pBox_Game = new PictureBox();
             pBox_Game.Parent = this;
@@ -77,6 +88,13 @@ namespace PathFinder.Logic
             pBox_Game.MouseUp += PBox_MouseUp;
             pBox_Game.MouseMove += PBox_MouseMove;
 
+            pBox_PanelRes = new PictureBox();
+            pBox_PanelRes.Parent = this;
+            pBox_PanelRes.Size = new Size(pBox_Game.Size.Width, PANELRES_HEIGHT);
+            pBox_PanelRes.Dock = DockStyle.Top;
+            pBox_PanelRes.SizeMode = PictureBoxSizeMode.AutoSize;
+            pBox_PanelRes.Paint += PanelResLogic.PBox_PanelRes_Paint;
+
             pBox_Panel = new PictureBox();
             pBox_Panel.Parent = this;
             pBox_Panel.Size = new Size(pBox_Game.Size.Width, PANEL_HEIGHT);
@@ -85,13 +103,29 @@ namespace PathFinder.Logic
             pBox_Panel.Paint += PanelLogic.PBox_Panel_Paint;
             pBox_Panel.MouseClick += PanelLogic.PBox_MouseClick;
 
-            //pBox_MMap = new PictureBox();
-            //pBox_MMap.Parent = this;
-            //pBox_MMap.Size = new Size(pBox_Game.Size.Width, PANEL_HEIGHT);
-            //pBox_MMap.Location();
-            //pBox_MMap.SizeMode = PictureBoxSizeMode.AutoSize;
+            resourceTimer = new System.Windows.Forms.Timer();
+            resourceTimer.Tick += ResourceTimer_Tick;
+            resourceTimer.Interval = 1000;
+            resourceTimer.Start();
 
             DrawMap();
+        }
+
+        private void ResourceTimer_Tick(object sender, EventArgs e)
+        {
+            for (int i = 0; i < Buildings.Count; i++)
+            {
+                Building building = Buildings[i];
+                for (int j = 0; j < building.MinedResources.Count; j++)
+                {
+                    (Type res, int value) = building.MinedResources[j];
+                    Resource resource = Resources.FirstOrDefault(x => x.GetType() == res);
+                    if (resource == null)
+                        continue;
+                    resource.Value += value;
+                }
+            }
+            DrawPanelRes();
         }
 
         public static Rectangle SelectedArea
@@ -100,12 +134,14 @@ namespace PathFinder.Logic
             set
             {
                 selectedArea = value;
-                //SelectedObjectInPanel = 0;
-                //SelectedAbilityInPanel = -1;
                 DrawPanel();
             }
         }
+
+
+
         public static Bitmap PanelBitmap { get; private set; }
+        public static Bitmap PanelResBitmap { get; private set; }
         public static Bitmap IconEmpty { get; private set; }
         public static Bitmap IconUnknown { get; private set; }
 
@@ -120,6 +156,7 @@ namespace PathFinder.Logic
         public static List<Terrain> Terrains { get; set; }
         public static List<Creation> Creations { get; set; }
         public static List<Building> Buildings { get; set; }
+        public static List<Resource> Resources { get; set; }
         public static Terrain[,] TerrainMap
         {
             get
@@ -213,6 +250,11 @@ namespace PathFinder.Logic
             pBox_Panel.Refresh();
         }
 
+        public static void DrawPanelRes()
+        {
+            pBox_PanelRes.Refresh();
+        }
+
         public static void UpdateTerrain(Terrain terrain)
         {
             Graphics g = Graphics.FromImage(backgroundBitmap);
@@ -244,7 +286,7 @@ namespace PathFinder.Logic
                         {
                             case 'g': Terrains.Add(new Grass(new Point(x, y))); break;
                             case 'w': Terrains.Add(new Water(new Point(x, y))); break;
-                            case 'o': Terrains.Add(new Oil(new Point(x, y))); break;
+                            case 'o': Terrains.Add(new OilSource(new Point(x, y))); break;
                             case 'r': Terrains.Add(new Rock(new Point(x, y))); break;
                             case 's': Terrains.Add(new Sand(new Point(x, y))); break;
                             case 'v': Terrains.Add(new GameObjects.Terrains.Void(new Point(x, y))); break;

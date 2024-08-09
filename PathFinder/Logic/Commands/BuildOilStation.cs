@@ -17,7 +17,7 @@ namespace PathFinder.Logic.Commands
 
         public override OutputParameters Run(InputParameters input)
         {
-            if (!(input.receiver is GameObjects.Terrains.Oil))
+            if (!(input.receiver is GameObjects.Terrains.OilSource))
             {
                 return new OutputParameters()
                 {

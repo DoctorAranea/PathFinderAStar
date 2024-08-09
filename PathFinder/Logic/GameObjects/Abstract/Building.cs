@@ -24,5 +24,7 @@ namespace PathFinder.Logic.GameObjects
         public abstract Bitmap BuildingBitmap { get; protected set; }
 
         public override List<Command> Commands { get; set; } = new List<Command>();
+
+        public abstract List<(Type, int)> MinedResources { get; set; }
     }
 }

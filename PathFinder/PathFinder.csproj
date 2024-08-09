@@ -63,14 +63,17 @@
     <Compile Include="Logic\GameObjects\Terrains\Rock.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Sand.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Void.cs" />
-    <Compile Include="Logic\GameObjects\Terrains\Oil.cs" />
+    <Compile Include="Logic\GameObjects\Terrains\OilSource.cs" />
     <Compile Include="Logic\GameObjects\Terrains\Water.cs" />
     <Compile Include="Logic\GameObjects\GameObject.cs" />
     <Compile Include="Logic\MouseLogic.cs" />
     <Compile Include="Logic\PanelLogic.cs" />
+    <Compile Include="Logic\PanelResLogic.cs" />
     <Compile Include="Logic\PFinder.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Logic\Resource.cs" />
+    <Compile Include="Logic\Resources\Oil.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

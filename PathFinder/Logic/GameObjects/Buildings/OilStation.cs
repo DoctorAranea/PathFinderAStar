@@ -24,6 +24,11 @@ namespace PathFinder.Logic.GameObjects.Buildings
         protected override string BuildingBitmapFile { get; set; } = "oil_station\\s_oilStation.png";
         public override Bitmap BuildingBitmap { get; protected set; }
 
+        public override List<(Type, int)> MinedResources { get; set; } = new List<(Type, int)>()
+        {
+            (typeof(Resources.Oil), 1)
+        };
+
         protected override void Draw(Graphics g)
         {
             SolidBrush brush = new SolidBrush(Color.DarkRed);
